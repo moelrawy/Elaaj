@@ -10,8 +10,8 @@ namespace Elaaj.Domain.Entities
     public class Pharmacy
     {
         public int Id { get; set; }
-        public int Name { get; set; }
-        public string imageUrl { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string imageUrl { get; set; } = string.Empty;
         public string Address { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
