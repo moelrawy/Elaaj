@@ -18,5 +18,10 @@ namespace Elaaj.Domain.Entities
         public string WorkingHours { get; set; } = string.Empty;
         public bool HasDelivery { get; set; }
         public string ContactNumber { get; set; } = string.Empty;
+
+
+        public ICollection<PostReply> Replies { get; set; } = new List<PostReply>();
+        public ICollection<PharmacyMessage> SentMessages { get; set; } = new List<PharmacyMessage>();
+        public ICollection<PharmacyMessage> ReceivedMessages { get; set; } = new List<PharmacyMessage>();
     }
 }
