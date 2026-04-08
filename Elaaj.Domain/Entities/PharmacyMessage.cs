@@ -16,7 +16,7 @@ namespace Elaaj.Domain.Entities
         public int SenderPharmacyId { get; set; }
         public Pharmacy SenderPharmacy { get; set; } = null!;
 
-        public int? ReciverPharmacyId { get; set; }
-        public Pharmacy? ReciverPharmacy { get; set; }
+        public int? ReceiverPharmacyId { get; set; }
+        public Pharmacy? ReceiverPharmacy { get; set; }
     }
 }

@@ -13,6 +13,7 @@ public class Post
     public string Content { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public Patient Patient { get; set; }
     public ICollection<PostReply> postReplies { get; set; } = new List<PostReply>();
 
 }
