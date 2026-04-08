@@ -14,6 +14,8 @@ public class PostReply
     public int PharmacyId { get; set; }
     public string Message { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public Post Post { get; set; } = null!;
+    public Pharmacy Pharmacy { get; set; } = null!;
     public int PostId { get; set; }
 
 }
