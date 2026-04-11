@@ -1,6 +1,7 @@
 ﻿using Elaaj.Domain.Interfaces;
 using Elaaj.infrastructure.Data;
 using Elaaj.infrastructure.Repositories;
+using Elaaj.infrastructure.Seeders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,8 +17,12 @@ namespace Elaaj.Infrastructure.Extensions
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            return services; 
+            services.AddScoped<ISeeder, Seeder>();
+            return services;
+
+            
         }
     }
 }
