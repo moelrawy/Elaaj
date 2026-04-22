@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Elaaj.Application.Features.Patient.Dtos
+﻿namespace Elaaj.Application.Features.Patient.Dtos
 {
-    class PatientProfile
+    public class PatientProfile
     {
     }
 }

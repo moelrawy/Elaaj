@@ -1,10 +1,12 @@
-﻿using Elaaj.Domain.Interfaces;
+﻿using Elaaj.Application.Features.Pharmacies.Dtos;
+using Elaaj.Domain.Interfaces;
 using Elaaj.infrastructure.Data;
 using Elaaj.infrastructure.Repositories;
 using Elaaj.infrastructure.Seeders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 
 namespace Elaaj.Infrastructure.Extensions
 {
@@ -20,6 +22,8 @@ namespace Elaaj.Infrastructure.Extensions
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<ISeeder, Seeder>();
+           
+         
             return services;
 
             
