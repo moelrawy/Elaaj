@@ -18,9 +18,4 @@
     <ProjectReference Include="..\Elaaj.Domain\Elaaj.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Patient\Commands\" />
-    <Folder Include="Features\Patient\Queries\" />
-  </ItemGroup>
-
 </Project>
