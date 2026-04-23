@@ -33,3 +33,42 @@ Content-Type: application/json
 }
 
 ###
+
+
+GET {{Elaaj.API_HostAddress}}/api/pharmacies
+
+###
+
+@id=4
+GET {{Elaaj.API_HostAddress}}/api/pharmacies/{{id}}
+
+###
+PUT {{Elaaj.API_HostAddress}}/api/pharmacies/{{id}}
+Content-Type: application/json
+
+{
+  "Id" : 1,
+  "name": "Assiut Pharmacy"
+}
+
+###
+
+POST {{Elaaj.API_HostAddress}}/api/pharmacies
+Content-Type: application/json
+
+{
+  "name": "Test4",
+  "imageUrl": "",
+  "address": "",
+  "latitude": 27.120,
+  "longitude": 31.18,
+  "workingHours": "08:00 AM - 12:00 AM",
+  "hasDelivery": true,
+  "contactNumber": ""
+}
+
+###
+
+DELETE {{Elaaj.API_HostAddress}}/api/pharmacies/{{id}}
+
+###
