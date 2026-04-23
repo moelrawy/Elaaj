@@ -8,17 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.14" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Elaaj.Domain\Elaaj.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\Patient\Commands\" />
-    <Folder Include="Features\Patient\Queries\" />
   </ItemGroup>
 
 </Project>

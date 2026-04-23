@@ -1,3 +1,5 @@
+using Elaaj.API.Extentions;
+using Elaaj.API.Middlewares;
 using Elaaj.Application.Extensions;
 using Elaaj.infrastructure.Seeders;
 using Elaaj.Infrastructure.Extensions;
@@ -6,9 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+
+builder.AddPresentation();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+//builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
@@ -20,10 +23,14 @@ var seeder = scope.ServiceProvider.GetRequiredService<ISeeder>();
 
 await seeder.Seed();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+   
 }
 
 app.UseHttpsRedirection();
