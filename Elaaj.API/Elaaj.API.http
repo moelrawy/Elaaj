@@ -1,7 +1,36 @@
 @Elaaj.API_HostAddress = https://localhost:7061
 
-GET {{Elaaj.API_HostAddress}}/weatherforecast/
-Accept: application/json
+
+GET {{Elaaj.API_HostAddress}}/api/Patients
+
+###
+
+POST {{Elaaj.API_HostAddress}}/api/Patients
+Content-Type: application/json
+
+{
+  "fullName":"alaa hassan",
+  "region": "Cairo"
+}
+
+###
+
+@id=6
+DELETE {{Elaaj.API_HostAddress}}/api/Patients/{{id}}
+
+###
+
+GET {{Elaaj.API_HostAddress}}/api/Patients/{{id}}
+
+###
+
+PATCH {{Elaaj.API_HostAddress}}/api/Patients/{id}
+Content-Type: application/json
+
+{
+  "fullName": "Mustafa Yasser",
+  "region": "Assiut"
+}
 
 ###
 
