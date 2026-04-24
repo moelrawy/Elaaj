@@ -1,5 +1,6 @@
 ﻿using Elaaj.Application.Features.Pharmacies.Commands.CreatePharmacy;
 using Elaaj.Application.Features.Pharmacies.Commands.DeletePharmacy;
+using Elaaj.Application.Features.Pharmacies.Commands.ToggleFavorite;
 using Elaaj.Application.Features.Pharmacies.Commands.UpdatePharmacy;
 using Elaaj.Application.Features.Pharmacies.Queries.GetNearbyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacy;
@@ -75,6 +76,13 @@ namespace Elaaj.API.Controllers
             if (!success) return NotFound(new { Message = "الصيدلية غير موجودة" });
 
             return Ok(new { Message = "تم حذف الصيدلية بنجاح" });
+        }
+
+        [HttpPost("toggle-favorite")]
+        public async Task<IActionResult> ToggleFavorite([FromBody] ToggleFavoriteCommand command)
+        {
+            await _mediator.Send(command);
+            return Ok(new { Message = "تم تحديث قائمة المفضلات" });
         }
     }
 }

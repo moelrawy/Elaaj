@@ -18,7 +18,7 @@ namespace Elaaj.infrastructure.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostReply> PostReplies { get; set; }
         public DbSet<PharmacyMessage> PharmacyMessages { get; set; }
-
+        public DbSet<UserFavorite> UserFavorites { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

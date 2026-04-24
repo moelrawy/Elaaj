@@ -11,5 +11,6 @@ public class PharmacyDto
     public string WorkingHours { get; set; } = string.Empty;
     public bool HasDelivery { get; set; }
     public string ContactNumber { get; set; } = string.Empty;
+    public double Distance { get; set; }
 
 }
