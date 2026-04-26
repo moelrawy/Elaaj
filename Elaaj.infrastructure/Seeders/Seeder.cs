@@ -1,5 +1,4 @@
-﻿
-using Elaaj.Domain.Entities;
+﻿using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,14 +8,15 @@ public class Seeder(ApplicationDbContext dbContext) : ISeeder
 {
     public async Task Seed()
     {
-        if(dbContext.Database.GetPendingMigrations().Any())
+        
+        if (dbContext.Database.GetPendingMigrations().Any())
         {
             await dbContext.Database.MigrateAsync();
         }
 
-        if(await dbContext.Database.CanConnectAsync())
+        if (await dbContext.Database.CanConnectAsync())
         {
-            // Seed Pharmacies
+           
             if (!dbContext.Pharmacies.Any())
             {
                 var pharmacies = GetPharmacies();
@@ -24,34 +24,16 @@ public class Seeder(ApplicationDbContext dbContext) : ISeeder
                 await dbContext.SaveChangesAsync();
             }
 
-            // Seed Patients
-            if (!dbContext.Patients.Any())
-            {
-                var patients = GetPatients();
-                dbContext.Patients.AddRange(patients);
-                await dbContext.SaveChangesAsync();
-            }
-
-            // Seed Posts & Replies 
-            if (!dbContext.Posts.Any())
-            {
-                var patient = await dbContext.Patients.FirstOrDefaultAsync();
-                var pharmacy = await dbContext.Pharmacies.FirstOrDefaultAsync();
-
-                if (patient != null && pharmacy != null)
-                {
-                    var posts = GetPosts(patient.Id, pharmacy.Id);
-                    dbContext.Posts.AddRange(posts);
-                    await dbContext.SaveChangesAsync();
-                }
-            }
-
+            /* ملاحظة: الـ Posts معطلة مؤقتاً لأنها بتعتمد على الـ UserId (string) 
+               ولازم نكريت يوزر الأول عشان نربطه بيها. 
+               هنرجع نشغلها لما نخلص الـ Register.
+            */
         }
     }
 
     private IEnumerable<Pharmacy> GetPharmacies()
     {
-        List<Pharmacy> pharmacies = [
+        return [
             new() {
                 Name = "Al-Shifa Pharmacy",
                 Address = "Assiut - Al-Nammis St.",
@@ -73,39 +55,5 @@ public class Seeder(ApplicationDbContext dbContext) : ISeeder
                 HasDelivery = false
             }
         ];
-
-        return pharmacies;
-    }
-
-    private IEnumerable<Patient> GetPatients()
-    {
-        List<Patient> patients = 
-        [
-         new() { FullName = "Mohammed Hassan", Region = "Asyut - City Center" },
-         new() { FullName = "Ahmed Morsi", Region = "Asyut - University District" }
-        ];
-
-        return patients;
-    }
-
-    private IEnumerable<Post> GetPosts(int patientId, int pharmacyId)
-    {
-        List<Post> posts = [
-        new() {
-            Content = "Is there an alternative for Panadol Cold & Flu?",
-            CreatedAt = DateTime.UtcNow,
-            PatientId = patientId,
-            ImageUrl = "https://example.com/med-post.png",
-            postReplies = [
-                new() {
-                    Message = "Yes, you can use Adol Sinus.",
-                    CreatedAt = DateTime.UtcNow,
-                    PharmacyId = pharmacyId
-                }
-            ]
-        }
-    ];
-
-        return posts;
     }
 }
