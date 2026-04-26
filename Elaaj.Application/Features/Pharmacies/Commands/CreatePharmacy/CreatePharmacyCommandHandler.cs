@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Pharmacies.Commands.CreatePharmacy;
 
-public class CreatePharmacyCommandHandler : IRequestHandler<CreatePharmacyCommand, int>
+public class CreatePharmacyCommandHandler : IRequestHandler<CreatePharmacyCommand, Guid>
 {
     private readonly IGenericRepository<Pharmacy> _repository;
     private readonly IMapper _mapper;
@@ -21,7 +21,7 @@ public class CreatePharmacyCommandHandler : IRequestHandler<CreatePharmacyComman
         _mapper = mapper;
     }
 
-    public async Task<int> Handle(CreatePharmacyCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreatePharmacyCommand request, CancellationToken cancellationToken)
     {
         var pharmacy = _mapper.Map<Pharmacy>(request);
         await _repository.AddAsync(pharmacy);

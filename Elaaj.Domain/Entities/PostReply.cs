@@ -10,8 +10,9 @@ namespace Elaaj.Domain.Entities;
 public class PostReply
 {
     public int Id { get; set; }
-    public int PatientId { get; set; }
-    public int PharmacyId { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public User User { get; set; } = null!;
+    public Guid PharmacyId { get; set; }
     public string Message { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Post Post { get; set; } = null!;

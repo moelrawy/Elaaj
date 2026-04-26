@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Pharmacies.Commands.CreatePharmacy;
 
-public class CreatePharmacyCommand : IRequest<int>
+public class CreatePharmacyCommand : IRequest<Guid>
 {
     public string Name { get; set; } = string.Empty;
     public string imageUrl { get; set; } = string.Empty;
