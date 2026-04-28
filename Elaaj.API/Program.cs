@@ -1,6 +1,7 @@
 using Elaaj.API.Extentions;
 using Elaaj.API.Middlewares;
 using Elaaj.Application.Extensions;
+using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Seeders;
 using Elaaj.Infrastructure.Extensions;
 
@@ -23,7 +24,7 @@ var seeder = scope.ServiceProvider.GetRequiredService<ISeeder>();
 
 await seeder.Seed();
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
+//app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -34,6 +35,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapGroup("api/identity")
+       .WithTags("Identity")
+       .MapIdentityApi<User>();
 
 app.UseAuthorization();
 

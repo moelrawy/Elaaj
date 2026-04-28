@@ -1,14 +1,19 @@
 ﻿using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data;
+using Elaaj.infrastructure.Seeders;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Restaurants.Domain.Constants;
 
-namespace Elaaj.infrastructure.Seeders;
+namespace Elaaj.Infrastructure.Seeders;
 
-public class Seeder(ApplicationDbContext dbContext) : ISeeder
+internal class Seeder(
+    ApplicationDbContext dbContext,
+    RoleManager<IdentityRole> roleManager)
+    : ISeeder
 {
     public async Task Seed()
     {
-        
         if (dbContext.Database.GetPendingMigrations().Any())
         {
             await dbContext.Database.MigrateAsync();
@@ -16,18 +21,30 @@ public class Seeder(ApplicationDbContext dbContext) : ISeeder
 
         if (await dbContext.Database.CanConnectAsync())
         {
-           
-            if (!dbContext.Pharmacies.Any())
+            if (!await dbContext.Roles.AnyAsync())
+            {
+                await SeedRoles();
+            }
+
+            if (!await dbContext.Pharmacies.AnyAsync())
             {
                 var pharmacies = GetPharmacies();
                 dbContext.Pharmacies.AddRange(pharmacies);
                 await dbContext.SaveChangesAsync();
             }
+        }
+    }
 
-            /* ملاحظة: الـ Posts معطلة مؤقتاً لأنها بتعتمد على الـ UserId (string) 
-               ولازم نكريت يوزر الأول عشان نربطه بيها. 
-               هنرجع نشغلها لما نخلص الـ Register.
-            */
+    private async Task SeedRoles()
+    {
+        string[] roles = [UserRoles.User, UserRoles.PharmacyAdmin, UserRoles.Owner];
+
+        foreach (var roleName in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
         }
     }
 
