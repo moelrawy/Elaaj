@@ -57,7 +57,7 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdatePharmacyCommand command)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePharmacyCommand command)
         {
             if (id != command.Id) return BadRequest(new { Message = "الـ ID غير متطابق" });
 
@@ -69,7 +69,7 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var success = await _mediator.Send(new DeletePharmacyCommand { Id = id });
 

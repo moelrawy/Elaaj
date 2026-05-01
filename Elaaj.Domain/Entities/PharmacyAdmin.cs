@@ -4,7 +4,7 @@ public class PharmacyAdmin
 {
     public string UserId { get; set; } = string.Empty;
     public Guid PharmacyId { get; set; }
-    public string Role { get; set; } = "Owner";
+    public string Role { get; set; } = "PharmacyOwner";
     public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;

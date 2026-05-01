@@ -9,6 +9,7 @@ namespace Elaaj.Application.Features.Pharmacies.Commands.CreatePharmacy;
 
 public class CreatePharmacyCommand : IRequest<Guid>
 {
+    public string CreatorUserId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string imageUrl { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
