@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elaaj.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,5 +17,6 @@ namespace Elaaj.Domain.Interfaces
         void Update(T entity);
         void Delete(T entity);
         Task<int> SaveChangesAsync();
+        Task<T?> GetByIdAsync(Guid id);
     }
 }

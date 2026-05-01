@@ -24,6 +24,14 @@ public class CreatePharmacyCommandHandler : IRequestHandler<CreatePharmacyComman
     public async Task<Guid> Handle(CreatePharmacyCommand request, CancellationToken cancellationToken)
     {
         var pharmacy = _mapper.Map<Pharmacy>(request);
+
+        pharmacy.Admins.Add(new PharmacyAdmin
+        {
+            UserId = request.CreatorUserId,
+            PharmacyId = pharmacy.Id,
+            Role = "PharmacyOwner"
+        });
+
         await _repository.AddAsync(pharmacy);
         await _repository.SaveChangesAsync();
         return pharmacy.Id;

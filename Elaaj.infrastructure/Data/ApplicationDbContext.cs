@@ -78,5 +78,19 @@ public class ApplicationDbContext : IdentityDbContext<User>
             .HasOne(uf => uf.Pharmacy)
             .WithMany()
             .HasForeignKey(uf => uf.PharmacyId);
+
+        // 6. ربط الروشتة بالردود (لو الروشتة اتمسحت، ردودها تتمسح)
+        modelBuilder.Entity<PrescriptionReply>()
+            .HasOne(pr => pr.Prescription)
+            .WithMany(p => p.Replies)
+            .HasForeignKey(pr => pr.PrescriptionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // 7. ربط الرد بالصيدلية (ممنوع مسح الصيدلية لو ليها ردود متعلقة عشان الـ History بتاع المريض)
+        modelBuilder.Entity<PrescriptionReply>()
+            .HasOne(pr => pr.Pharmacy)
+            .WithMany() // ممكن تضيف ICollection<PrescriptionReply> في الـ Pharmacy لو حابب
+            .HasForeignKey(pr => pr.PharmacyId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

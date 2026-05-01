@@ -9,5 +9,6 @@ namespace Elaaj.Application.Features.Pharmacies.Commands.DeletePharmacy;
 
 public class DeletePharmacyCommand : IRequest<bool>
 {
-    public int Id { get; set; }
+    public string UserId { get; set; }
+    public Guid Id { get; set; }
 }
