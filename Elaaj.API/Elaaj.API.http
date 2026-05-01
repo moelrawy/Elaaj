@@ -72,3 +72,25 @@ Content-Type: application/json
 DELETE {{Elaaj.API_HostAddress}}/api/pharmacies/{{id}}
 
 ###
+
+PATCH {{Elaaj.API_HostAddress}}/api/identity/user
+Content-Type: application/json
+
+{
+  //UpdateUserDetailsCommand
+}
+
+###
+
+DELETE {{Elaaj.API_HostAddress}}/api/identity/userRole
+
+###
+
+POST {{Elaaj.API_HostAddress}}/api/identity/userRole
+Content-Type: application/json
+
+{
+  //AssignUserRoleCommand
+}
+
+###
