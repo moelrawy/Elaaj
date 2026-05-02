@@ -58,5 +58,18 @@ namespace Elaaj.infrastructure.Repositories
         {
             _dbSet.Update(entity);
         }
+        public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+
+            query = query.Where(predicate);
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.ToListAsync();
+        }
     }
 }
