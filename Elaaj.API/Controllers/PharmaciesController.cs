@@ -6,13 +6,16 @@ using Elaaj.Application.Features.Pharmacies.Queries.GetNearbyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacy;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacyById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Restaurants.Domain.Constants;
 
 namespace Elaaj.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PharmaciesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -22,6 +25,7 @@ namespace Elaaj.API.Controllers
             _mediator = mediator;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllPharmaciesQuery());
@@ -50,6 +54,7 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles =UserRoles.PharmacyAdmin)]
         public async Task<IActionResult> Create([FromBody] CreatePharmacyCommand command)
         {
             var PharmacyId = await _mediator.Send(command);
