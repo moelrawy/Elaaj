@@ -15,8 +15,9 @@ namespace UnitTests
             var handler = new CreatePostReplyCommandHandler(mocknotificationService.Object);
             var command = new CreatePostReplyCommand
             {
-                PatientId = "user123",
-                ReplyContent = "تم الرد"
+                ReceiverId = "user123",
+                ReplyContent = "تم الرد",
+                PostId=1
             };
             await handler.Handle(command,CancellationToken.None);
             mocknotificationService.Verify(x=>x.SendReplyNotification("user123",It.IsAny<string>()),Times.Once);

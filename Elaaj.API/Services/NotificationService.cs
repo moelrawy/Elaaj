@@ -11,9 +11,9 @@ namespace Elaaj.API.Services
         {
             _hubContext = hubContext;
         }
-        public async Task SendReplyNotification(string patientId, string message)
+        public async Task SendReplyNotification(string UserId, string message)
         {
-            await _hubContext.Clients.Group(patientId).SendAsync("ReceiveReply", message);
+            await _hubContext.Clients.Group(UserId).SendAsync("ReceiveReply", message);
         }
     }
 }

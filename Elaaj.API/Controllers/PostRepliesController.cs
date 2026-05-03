@@ -4,7 +4,7 @@ using Elaaj.Application.Features.PostReplies.Commands.CreatePostReply;
 namespace Elaaj.API.Controllers
 {
     [ApiController]
-    [Route("api/[cintroller")]
+    [Route("api/[controller]")]
     public class PostRepliesController:ControllerBase
     {
         private readonly ISender _mediator;

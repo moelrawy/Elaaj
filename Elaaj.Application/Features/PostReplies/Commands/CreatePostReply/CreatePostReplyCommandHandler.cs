@@ -11,7 +11,7 @@ namespace Elaaj.Application.Features.PostReplies.Commands.CreatePostReply
         }
         public async Task <Guid> Handle(CreatePostReplyCommand request,CancellationToken cancellationToken)
         {
-            await _notificationService.SendReplyNotification(request.PatientId, "تم الرد علي استشارتك");
+            await _notificationService.SendReplyNotification(request.ReceiverId, "تم الرد علي استشارتك");
             return Guid.NewGuid();
         }
 

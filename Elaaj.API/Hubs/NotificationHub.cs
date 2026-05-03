@@ -3,9 +3,9 @@ namespace Elaaj.API.Hubs
 {
     public class NotificationHub : Hub
     {
-        public async Task JoinUserGroup(string userId)
+        public async Task JoinUserGroup(string Id)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, Id);
         } 
 
     }

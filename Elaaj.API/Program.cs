@@ -1,11 +1,17 @@
 using Elaaj.API.Extentions;
+using Elaaj.API.Hubs;
 using Elaaj.API.Middlewares;
+using Elaaj.API.Services;
 using Elaaj.Application.Extensions;
+<<<<<<< Updated upstream
+=======
+using Elaaj.Application.Interfaces;
+using Elaaj.Domain.Entities;
+using Elaaj.infrastructure.Data;
+>>>>>>> Stashed changes
 using Elaaj.infrastructure.Seeders;
 using Elaaj.Infrastructure.Extensions;
-using Elaaj.API.Hubs;
-using Elaaj.API.Services;
-using Elaaj.Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 //Add SignalR services
@@ -61,6 +67,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 app.MapHub<NotificationHub>("/notificationsHub");
 
 app.Run();
