@@ -9,7 +9,8 @@ namespace Elaaj.Infrastructure.Seeders;
 
 internal class Seeder(
     ApplicationDbContext dbContext,
-    RoleManager<IdentityRole> roleManager)
+    RoleManager<IdentityRole> roleManager,
+    UserManager<User> userManager) 
     : ISeeder
 {
     public async Task Seed()
@@ -21,14 +22,34 @@ internal class Seeder(
 
         if (await dbContext.Database.CanConnectAsync())
         {
+            // 1. Seed Roles
             if (!await dbContext.Roles.AnyAsync())
             {
                 await SeedRoles();
             }
 
+            // 2. Seed Admin User (Owner) - خطوة ضرورية عشان الـ OwnerId
+            var adminEmail = "admin@elaaj.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FullName = "Admin System",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(adminUser, "Password123!"); // باسوورد تجريبي
+                await userManager.AddToRoleAsync(adminUser, UserRoles.Owner);
+            }
+
+            // 3. Seed Pharmacies
             if (!await dbContext.Pharmacies.AnyAsync())
             {
-                var pharmacies = GetPharmacies();
+                // بنباصي الـ Id بتاع الـ adminUser للميثود
+                var pharmacies = GetPharmacies(adminUser.Id);
                 dbContext.Pharmacies.AddRange(pharmacies);
                 await dbContext.SaveChangesAsync();
             }
@@ -37,7 +58,7 @@ internal class Seeder(
 
     private async Task SeedRoles()
     {
-        string[] roles = [UserRoles.User, UserRoles.PharmacyAdmin, UserRoles.Owner,UserRoles.PharmacyOwner];
+        string[] roles = [UserRoles.User, UserRoles.PharmacyAdmin, UserRoles.Owner, UserRoles.PharmacyOwner];
 
         foreach (var roleName in roles)
         {
@@ -48,7 +69,7 @@ internal class Seeder(
         }
     }
 
-    private IEnumerable<Pharmacy> GetPharmacies()
+    private IEnumerable<Pharmacy> GetPharmacies(string ownerId) // 👈 بنستقبل الـ Id هنا
     {
         return [
             new() {
@@ -59,7 +80,8 @@ internal class Seeder(
                 Latitude = 27.1809,
                 Longitude = 31.1836,
                 WorkingHours = "24/7",
-                HasDelivery = true
+                HasDelivery = true,
+                OwnerId = ownerId // 👈 ربطنا الصيدلية بالـ Owner
             },
             new() {
                 Name = "Care Pharmacy",
@@ -69,7 +91,8 @@ internal class Seeder(
                 Latitude = 27.1850,
                 Longitude = 31.1700,
                 WorkingHours = "08:00 AM - 12:00 AM",
-                HasDelivery = false
+                HasDelivery = false,
+                OwnerId = ownerId // 👈 ربطنا الصيدلية بالـ Owner
             }
         ];
     }
