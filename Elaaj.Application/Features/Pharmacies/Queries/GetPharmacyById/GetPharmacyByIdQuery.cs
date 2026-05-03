@@ -10,6 +10,6 @@ namespace Elaaj.Application.Features.Pharmacies.Queries.GetPharmacyById
 {
     public class GetPharmacyByIdQuery : IRequest<PharmacyDto>
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

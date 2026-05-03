@@ -16,7 +16,8 @@ public class ApplicationDbContext : IdentityDbContext<User>
     public DbSet<PharmacyMessage> PharmacyMessages { get; set; }
     public DbSet<UserFavorite> UserFavorites { get; set; }
     public DbSet<PharmacyAdmin> PharmacyAdmins { get; set; }
-
+    public DbSet<PrescriptionReply> PrescriptionReplies { get; set; }
+    public DbSet<Prescription> Prescriptions { get; set; } 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder); // ضروري جداً لجدول المستخدمين
@@ -28,12 +29,18 @@ public class ApplicationDbContext : IdentityDbContext<User>
         modelBuilder.Entity<PharmacyAdmin>()
             .HasOne(pa => pa.User)
             .WithMany(u => u.ManagedPharmacies)
-            .HasForeignKey(pa => pa.UserId);
+            .HasForeignKey(pa => pa.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<PharmacyAdmin>()
             .HasOne(pa => pa.Pharmacy)
             .WithMany(p => p.Admins)
-            .HasForeignKey(pa => pa.PharmacyId);
+            .HasForeignKey(pa => pa.PharmacyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PharmacyAdmin>()
+           .Property(pa => pa.UserId)
+           .HasMaxLength(450);
 
         // 2. إعدادات Posts
         modelBuilder.Entity<Post>()
@@ -75,9 +82,21 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
         // 5. إعدادات UserFavorite
         modelBuilder.Entity<UserFavorite>()
+            .HasOne(uf => uf.User)
+            .WithMany(u => u.Favorites)
+            .HasForeignKey(uf => uf.UserId)
+            .OnDelete(DeleteBehavior.Cascade); // لو اليوزر اتمسح مفضلاته تتمسح
+
+        modelBuilder.Entity<UserFavorite>()
             .HasOne(uf => uf.Pharmacy)
             .WithMany()
-            .HasForeignKey(uf => uf.PharmacyId);
+            .HasForeignKey(uf => uf.PharmacyId)
+            .OnDelete(DeleteBehavior.Restrict); // ممنوع مسح صيدلية وهي في مفضلة حد (أو خليها Cascade حسب الرغبة)
+
+        // 6. إعدادات PrescriptionReply (حل مشكلة الـ Decimal Warning)
+        modelBuilder.Entity<PrescriptionReply>()
+            .Property(pr => pr.TotalPrice)
+            .HasColumnType("decimal(18,2)"); // تحديد الدقة المالية
 
         // 6. ربط الروشتة بالردود (لو الروشتة اتمسحت، ردودها تتمسح)
         modelBuilder.Entity<PrescriptionReply>()
@@ -92,5 +111,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
             .WithMany() // ممكن تضيف ICollection<PrescriptionReply> في الـ Pharmacy لو حابب
             .HasForeignKey(pr => pr.PharmacyId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<UserFavorite>()
+            .HasKey(uf => new { uf.UserId, uf.PharmacyId });
     }
 }

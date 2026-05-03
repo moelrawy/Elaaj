@@ -19,5 +19,7 @@ namespace Elaaj.Domain.Interfaces
         Task<int> SaveChangesAsync();
         Task<T?> GetByIdAsync(Guid id);
         Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+        
+        Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
     }
 }

@@ -14,6 +14,7 @@ public class UpdateUserDetailsCommandHandler(ILogger<UpdateUserDetailsCommandHan
     public async Task Handle(UpdateUserDetailsCommand request, CancellationToken cancellationToken)
     {
         var userContextData = userContext.GetCurrentUser();
+        if (userContextData == null) throw new UnauthorizedAccessException();
 
         logger.LogInformation("Updating user: {UserId}, with {@Request}", userContextData!.Id, request);
 
@@ -24,7 +25,12 @@ public class UpdateUserDetailsCommandHandler(ILogger<UpdateUserDetailsCommandHan
             throw new NotFoundException(nameof(User), userContextData.Id);
         }
 
+        if (request.FullName != null) dbUser.FullName = request.FullName;
         dbUser.DateOfBirth = request.DateOfBirth;
+        dbUser.imageUrl = request.imageUrl; 
+
+        if (request.Latitude.HasValue) dbUser.Latitude = request.Latitude.Value;
+        if (request.Longitude.HasValue) dbUser.Longitude = request.Longitude.Value;
 
         await userStore.UpdateAsync(dbUser, cancellationToken);
     }

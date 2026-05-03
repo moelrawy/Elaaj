@@ -9,6 +9,5 @@ namespace Elaaj.Application.Features.Pharmacies.Commands.ToggleFavorite;
 
 public class ToggleFavoriteCommand : IRequest<bool>
 {
-    public string UserId { get; set; } = string.Empty;
     public Guid PharmacyId { get; set; }
 }

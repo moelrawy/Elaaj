@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
 using Elaaj.Application.Features.Pharmacies.Dtos;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacy;
+using Elaaj.Application.Users; // الـ Namespace بتاع الـ UserContext
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Restaurants.Domain.Constants; // الـ Namespace بتاع الـ UserRoles
 
 namespace Elaaj.Application.Features.Pharmacies.Queries.GetAllPharmacies;
 
@@ -16,16 +13,45 @@ public class GetAllPharmaciesQueryHandler : IRequestHandler<GetAllPharmaciesQuer
 {
     private readonly IGenericRepository<Pharmacy> _repository;
     private readonly IMapper _mapper;
+    private readonly IUserContext _userContext;
 
-    public GetAllPharmaciesQueryHandler(IGenericRepository<Pharmacy> repository, IMapper mapper)
+    public GetAllPharmaciesQueryHandler(
+        IGenericRepository<Pharmacy> repository,
+        IMapper mapper,
+        IUserContext userContext)
     {
         _repository = repository;
         _mapper = mapper;
+        _userContext = userContext;
     }
 
     public async Task<IEnumerable<PharmacyDto>> Handle(GetAllPharmaciesQuery request, CancellationToken cancellationToken)
     {
-        var pharmacies = await _repository.GetAllAsync();
+        var currentUser = _userContext.GetCurrentUser();
+
+        IEnumerable<Pharmacy> pharmacies;
+
+        if (currentUser != null && currentUser.IsInRole(UserRoles.Owner))
+        {
+            pharmacies = await _repository.GetAllAsync();
+        }
+
+        else if (currentUser != null && currentUser.IsInRole(UserRoles.PharmacyOwner))
+        {
+            pharmacies = await _repository.GetAllAsync(p => p.OwnerId == currentUser.Id);
+        }
+
+        else if (currentUser != null && currentUser.IsInRole(UserRoles.PharmacyAdmin))
+        {
+            pharmacies = await _repository.GetAllAsync(p =>
+                p.Admins.Any(a => a.UserId == currentUser.Id));
+        }
+
+        else
+        {
+            pharmacies = await _repository.GetAllAsync();
+        }
+
         return _mapper.Map<IEnumerable<PharmacyDto>>(pharmacies);
     }
 }
