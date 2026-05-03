@@ -59,7 +59,7 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = UserRoles.PharmacyOwner)]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] CreatePharmacyCommand command)
         {
             var PharmacyId = await _mediator.Send(command);

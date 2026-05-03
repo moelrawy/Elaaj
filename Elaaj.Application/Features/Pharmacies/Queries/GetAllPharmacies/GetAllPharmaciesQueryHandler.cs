@@ -28,29 +28,10 @@ public class GetAllPharmaciesQueryHandler : IRequestHandler<GetAllPharmaciesQuer
     public async Task<IEnumerable<PharmacyDto>> Handle(GetAllPharmaciesQuery request, CancellationToken cancellationToken)
     {
         var currentUser = _userContext.GetCurrentUser();
+        if (currentUser == null) 
+            throw new UnauthorizedAccessException();
 
-        IEnumerable<Pharmacy> pharmacies;
-
-        if (currentUser != null && currentUser.IsInRole(UserRoles.Owner))
-        {
-            pharmacies = await _repository.GetAllAsync();
-        }
-
-        else if (currentUser != null && currentUser.IsInRole(UserRoles.PharmacyOwner))
-        {
-            pharmacies = await _repository.GetAllAsync(p => p.OwnerId == currentUser.Id);
-        }
-
-        else if (currentUser != null && currentUser.IsInRole(UserRoles.PharmacyAdmin))
-        {
-            pharmacies = await _repository.GetAllAsync(p =>
-                p.Admins.Any(a => a.UserId == currentUser.Id));
-        }
-
-        else
-        {
-            pharmacies = await _repository.GetAllAsync();
-        }
+        var pharmacies = await _repository.GetAllAsync();
 
         return _mapper.Map<IEnumerable<PharmacyDto>>(pharmacies);
     }
