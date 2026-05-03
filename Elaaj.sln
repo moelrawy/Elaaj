@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36511.14 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11620.152 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elaaj.Domain", "Elaaj.Domain\Elaaj.Domain.csproj", "{FC86711E-536A-41A1-8C29-F5C0A676F8A9}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elaaj.infrastructure", "Elaaj.infrastructure\Elaaj.infrastructure.csproj", "{9CCAC045-A99C-44A2-AC95-568FB001A56C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elaaj.API", "Elaaj.API\Elaaj.API.csproj", "{66AC5DDC-9A4F-48A0-A472-098A117084CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{53FF64AE-24FC-4AEC-9802-826133D4FBA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{66AC5DDC-9A4F-48A0-A472-098A117084CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66AC5DDC-9A4F-48A0-A472-098A117084CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66AC5DDC-9A4F-48A0-A472-098A117084CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53FF64AE-24FC-4AEC-9802-826133D4FBA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53FF64AE-24FC-4AEC-9802-826133D4FBA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53FF64AE-24FC-4AEC-9802-826133D4FBA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53FF64AE-24FC-4AEC-9802-826133D4FBA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
