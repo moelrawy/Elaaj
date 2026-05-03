@@ -1,4 +1,4 @@
-using Elaaj.API.Extenions;
+using Elaaj.API.Extentions;
 using Elaaj.API.Hubs;
 using Elaaj.API.Middlewares;
 using Elaaj.API.Services;
@@ -25,6 +25,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -67,10 +68,9 @@ app.MapGroup("api/identity")
 app.UseAuthorization();
 
 app.MapControllers();
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+// OR inside your AddApplication() or AddInfrastructure() extension methods
 app.MapHub<NotificationHub>("/notificationsHub");
 
 app.Run();

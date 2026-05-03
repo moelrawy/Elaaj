@@ -28,8 +28,8 @@ public class GetAllPharmaciesQueryHandler : IRequestHandler<GetAllPharmaciesQuer
     public async Task<IEnumerable<PharmacyDto>> Handle(GetAllPharmaciesQuery request, CancellationToken cancellationToken)
     {
         var currentUser = _userContext.GetCurrentUser();
-        if (currentUser == null) 
-            throw new UnauthorizedAccessException();
+        //if (currentUser == null) 
+        //    throw new UnauthorizedAccessException();
 
         var pharmacies = await _repository.GetAllAsync();
 
