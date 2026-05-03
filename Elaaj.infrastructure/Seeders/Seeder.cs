@@ -1,57 +1,77 @@
-﻿
-using Elaaj.Domain.Entities;
+﻿using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data;
+using Elaaj.infrastructure.Seeders;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Restaurants.Domain.Constants;
 
-namespace Elaaj.infrastructure.Seeders;
+namespace Elaaj.Infrastructure.Seeders;
 
-public class Seeder(ApplicationDbContext dbContext) : ISeeder
+internal class Seeder(
+    ApplicationDbContext dbContext,
+    RoleManager<IdentityRole> roleManager,
+    UserManager<User> userManager) 
+    : ISeeder
 {
     public async Task Seed()
     {
-        if(dbContext.Database.GetPendingMigrations().Any())
+        if (dbContext.Database.GetPendingMigrations().Any())
         {
             await dbContext.Database.MigrateAsync();
         }
 
-        if(await dbContext.Database.CanConnectAsync())
+        if (await dbContext.Database.CanConnectAsync())
         {
-            // Seed Pharmacies
-            if (!dbContext.Pharmacies.Any())
+            // 1. Seed Roles
+            if (!await dbContext.Roles.AnyAsync())
             {
-                var pharmacies = GetPharmacies();
+                await SeedRoles();
+            }
+
+            // 2. Seed Admin User (Owner) - خطوة ضرورية عشان الـ OwnerId
+            var adminEmail = "admin@elaaj.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FullName = "Admin System",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(adminUser, "Password123!"); // باسوورد تجريبي
+                await userManager.AddToRoleAsync(adminUser, UserRoles.Owner);
+            }
+
+            // 3. Seed Pharmacies
+            if (!await dbContext.Pharmacies.AnyAsync())
+            {
+                // بنباصي الـ Id بتاع الـ adminUser للميثود
+                var pharmacies = GetPharmacies(adminUser.Id);
                 dbContext.Pharmacies.AddRange(pharmacies);
                 await dbContext.SaveChangesAsync();
             }
-
-            // Seed Patients
-            if (!dbContext.Patients.Any())
-            {
-                var patients = GetPatients();
-                dbContext.Patients.AddRange(patients);
-                await dbContext.SaveChangesAsync();
-            }
-
-            // Seed Posts & Replies 
-            if (!dbContext.Posts.Any())
-            {
-                var patient = await dbContext.Patients.FirstOrDefaultAsync();
-                var pharmacy = await dbContext.Pharmacies.FirstOrDefaultAsync();
-
-                if (patient != null && pharmacy != null)
-                {
-                    var posts = GetPosts(patient.Id, pharmacy.Id);
-                    dbContext.Posts.AddRange(posts);
-                    await dbContext.SaveChangesAsync();
-                }
-            }
-
         }
     }
 
-    private IEnumerable<Pharmacy> GetPharmacies()
+    private async Task SeedRoles()
     {
-        List<Pharmacy> pharmacies = [
+        string[] roles = [UserRoles.User, UserRoles.PharmacyAdmin, UserRoles.Owner, UserRoles.PharmacyOwner];
+
+        foreach (var roleName in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
+    }
+
+    private IEnumerable<Pharmacy> GetPharmacies(string ownerId) // 👈 بنستقبل الـ Id هنا
+    {
+        return [
             new() {
                 Name = "Al-Shifa Pharmacy",
                 Address = "Assiut - Al-Nammis St.",
@@ -60,7 +80,8 @@ public class Seeder(ApplicationDbContext dbContext) : ISeeder
                 Latitude = 27.1809,
                 Longitude = 31.1836,
                 WorkingHours = "24/7",
-                HasDelivery = true
+                HasDelivery = true,
+                OwnerId = ownerId // 👈 ربطنا الصيدلية بالـ Owner
             },
             new() {
                 Name = "Care Pharmacy",
@@ -70,42 +91,9 @@ public class Seeder(ApplicationDbContext dbContext) : ISeeder
                 Latitude = 27.1850,
                 Longitude = 31.1700,
                 WorkingHours = "08:00 AM - 12:00 AM",
-                HasDelivery = false
+                HasDelivery = false,
+                OwnerId = ownerId // 👈 ربطنا الصيدلية بالـ Owner
             }
         ];
-
-        return pharmacies;
-    }
-
-    private IEnumerable<Patient> GetPatients()
-    {
-        List<Patient> patients = 
-        [
-         new() { FullName = "Mohammed Hassan", Region = "Asyut - City Center" },
-         new() { FullName = "Ahmed Morsi", Region = "Asyut - University District" }
-        ];
-
-        return patients;
-    }
-
-    private IEnumerable<Post> GetPosts(int patientId, int pharmacyId)
-    {
-        List<Post> posts = [
-        new() {
-            Content = "Is there an alternative for Panadol Cold & Flu?",
-            CreatedAt = DateTime.UtcNow,
-            PatientId = patientId,
-            ImageUrl = "https://example.com/med-post.png",
-            postReplies = [
-                new() {
-                    Message = "Yes, you can use Adol Sinus.",
-                    CreatedAt = DateTime.UtcNow,
-                    PharmacyId = pharmacyId
-                }
-            ]
-        }
-    ];
-
-        return posts;
     }
 }

@@ -1,27 +1,31 @@
-﻿using Elaaj.Domain.Entities;
+﻿using Elaaj.Application.Users;
+using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Elaaj.Application.Features.Pharmacies.Commands.ToggleFavorite;
 
 public class ToggleFavoriteCommandHandler : IRequestHandler<ToggleFavoriteCommand, bool>
 {
     private readonly IGenericRepository<UserFavorite> _repository;
+    private readonly IUserContext _userContext;
 
-    public ToggleFavoriteCommandHandler(IGenericRepository<UserFavorite> repository)
+    public ToggleFavoriteCommandHandler(IGenericRepository<UserFavorite> repository, IUserContext userContext)
     {
         _repository = repository;
+        _userContext = userContext;
     }
 
     public async Task<bool> Handle(ToggleFavoriteCommand request, CancellationToken cancellationToken)
     {
+        var currentUser = _userContext.GetCurrentUser();
+
+        if (currentUser == null)
+            throw new UnauthorizedAccessException("يجب تسجيل الدخول لإضافة الصيدلية للمفضلة.");
+
         var favorite = await _repository.GetFirstOrDefaultAsync(f =>
-            f.PatientId == request.PatientId && f.PharmacyId == request.PharmacyId);
+            f.UserId == currentUser.Id && f.PharmacyId == request.PharmacyId);
 
         if (favorite != null)
         {
@@ -31,11 +35,13 @@ public class ToggleFavoriteCommandHandler : IRequestHandler<ToggleFavoriteComman
         {
             await _repository.AddAsync(new UserFavorite
             {
-                PatientId = request.PatientId,
+                UserId = currentUser.Id,
                 PharmacyId = request.PharmacyId
             });
         }
+
         await _repository.SaveChangesAsync();
+
         return true;
     }
 }

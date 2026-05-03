@@ -1,8 +1,11 @@
 ﻿using Elaaj.Application.Features.Pharmacies.Dtos;
+using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using Elaaj.infrastructure.Data;
 using Elaaj.infrastructure.Repositories;
 using Elaaj.infrastructure.Seeders;
+using Elaaj.Infrastructure.Seeders;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +24,11 @@ namespace Elaaj.Infrastructure.Extensions
 
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            services.AddIdentityApiEndpoints<User>()  
+             .AddRoles<IdentityRole>() 
+             .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddScoped<ISeeder, Seeder>();
            
          

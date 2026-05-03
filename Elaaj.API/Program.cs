@@ -1,14 +1,11 @@
-using Elaaj.API.Extentions;
+using Elaaj.API.Extenions;
 using Elaaj.API.Hubs;
 using Elaaj.API.Middlewares;
 using Elaaj.API.Services;
 using Elaaj.Application.Extensions;
-<<<<<<< Updated upstream
-=======
 using Elaaj.Application.Interfaces;
 using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data;
->>>>>>> Stashed changes
 using Elaaj.infrastructure.Seeders;
 using Elaaj.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +48,7 @@ app.UseCors("AllowAll");
 
 await seeder.Seed();
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
+//app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -62,6 +59,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapGroup("api/identity")
+       .WithTags("Identity")
+       .MapIdentityApi<User>();
 
 app.UseAuthorization();
 

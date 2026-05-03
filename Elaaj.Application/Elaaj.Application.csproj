@@ -17,5 +17,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Elaaj.Domain\Elaaj.Domain.csproj" />
   </ItemGroup>
+	
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
 </Project>

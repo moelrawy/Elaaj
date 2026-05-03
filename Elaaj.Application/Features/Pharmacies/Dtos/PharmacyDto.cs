@@ -2,7 +2,7 @@
 
 public class PharmacyDto
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string imageUrl { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
@@ -11,6 +11,6 @@ public class PharmacyDto
     public string WorkingHours { get; set; } = string.Empty;
     public bool HasDelivery { get; set; }
     public string ContactNumber { get; set; } = string.Empty;
-    public double Distance { get; set; }
-
+    public double? Distance { get; set; }
+    public string OwnerId { get; set; } = string.Empty;
 }

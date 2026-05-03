@@ -5,23 +5,30 @@ using Elaaj.Application.Features.Pharmacies.Commands.UpdatePharmacy;
 using Elaaj.Application.Features.Pharmacies.Queries.GetNearbyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacy;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacyById;
+using Elaaj.Application.Users;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Restaurants.Domain.Constants;
 
 namespace Elaaj.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PharmaciesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IUserContext _userContext;
 
-        public PharmaciesController(IMediator mediator)
+        public PharmaciesController(IMediator mediator,IUserContext userContext)
         {
             _mediator = mediator;
+            _userContext = userContext;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllPharmaciesQuery());
@@ -29,7 +36,8 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _mediator.Send(new GetPharmacyByIdQuery { Id = id });
             if (result == null) return NotFound(new { Message = "الصيدلية غير موجودة" });
@@ -37,6 +45,7 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpGet("nearby")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetNearby([FromQuery] double lat, [FromQuery] double lon, [FromQuery] double radius = 5)
         {
             var query = new GetNearbyPharmaciesQuery
@@ -50,6 +59,7 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] CreatePharmacyCommand command)
         {
             var PharmacyId = await _mediator.Send(command);
@@ -57,7 +67,8 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdatePharmacyCommand command)
+        [Authorize(Roles = $"{UserRoles.Owner},{UserRoles.PharmacyOwner}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePharmacyCommand command)
         {
             if (id != command.Id) return BadRequest(new { Message = "الـ ID غير متطابق" });
 
@@ -69,7 +80,8 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [Authorize(Roles = $"{UserRoles.Owner},{UserRoles.PharmacyOwner}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
             var success = await _mediator.Send(new DeletePharmacyCommand { Id = id });
 
@@ -81,6 +93,9 @@ namespace Elaaj.API.Controllers
         [HttpPost("toggle-favorite")]
         public async Task<IActionResult> ToggleFavorite([FromBody] ToggleFavoriteCommand command)
         {
+            var currentUser = _userContext.GetCurrentUser();
+
+            if (currentUser == null) return Unauthorized();
             await _mediator.Send(command);
             return Ok(new { Message = "تم تحديث قائمة المفضلات" });
         }

@@ -13,10 +13,10 @@ namespace Elaaj.Domain.Entities
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
 
-        public int SenderPharmacyId { get; set; }
-        public Pharmacy SenderPharmacy { get; set; } = null!;
+        public Guid SenderPharmacyId { get; set; }
+        public virtual Pharmacy SenderPharmacy { get; set; } = null!;
 
-        public int? ReceiverPharmacyId { get; set; }
-        public Pharmacy? ReceiverPharmacy { get; set; }
+        public Guid? ReceiverPharmacyId { get; set; }
+        public virtual Pharmacy? ReceiverPharmacy { get; set; }
     }
 }

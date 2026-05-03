@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Pharmacies.Commands.CreatePharmacy;
 
-public class CreatePharmacyCommand : IRequest<int>
+public class CreatePharmacyCommand : IRequest<Guid>
 {
     public string Name { get; set; } = string.Empty;
     public string imageUrl { get; set; } = string.Empty;
@@ -16,4 +16,6 @@ public class CreatePharmacyCommand : IRequest<int>
     public bool HasDelivery { get; set; }
     public string ContactNumber { get; set; } = string.Empty;
 
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
 }

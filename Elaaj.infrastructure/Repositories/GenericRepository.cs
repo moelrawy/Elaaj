@@ -33,8 +33,17 @@ namespace Elaaj.infrastructure.Repositories
         {
             return await _dbSet.ToListAsync();
         }
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> filter)
+        { 
+            return await _context.Set<T>().Where(filter).ToListAsync();
+        }
 
         public async Task<T?> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public async Task<T?> GetByIdAsync(Guid id)
         {
             return await _dbSet.FindAsync(id);
         }
@@ -52,6 +61,19 @@ namespace Elaaj.infrastructure.Repositories
         public void Update(T entity)
         {
             _dbSet.Update(entity);
+        }
+        public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+
+            query = query.Where(predicate);
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.ToListAsync();
         }
     }
 }

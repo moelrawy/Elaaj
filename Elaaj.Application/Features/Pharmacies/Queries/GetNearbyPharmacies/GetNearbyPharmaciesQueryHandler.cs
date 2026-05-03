@@ -24,17 +24,27 @@ public class GetNearbyPharmaciesQueryHandler : IRequestHandler<GetNearbyPharmaci
 
     public async Task<IEnumerable<PharmacyDto>> Handle(GetNearbyPharmaciesQuery request, CancellationToken cancellationToken)
     {
-        var allpharmacies = await _repository.GetAllAsync();
-        var nearbyPharmacies = allpharmacies.Where(p =>
-            CalculateDistance(request.Latitude, request.Longitude, p.Latitude, p.Longitude) <= request.RadiusInKm);
+        var allPharmacies = await _repository.GetAllAsync();
 
-        var pharmaciesWithDistance = nearbyPharmacies.Select(p =>
+       
+        var nearbyPharmacies = allPharmacies
+            .Where(p => p.Latitude != 0 && p.Longitude != 0) 
+            .Select(p => new
+            {
+                Entity = p,
+                Distance = CalculateDistance(request.Latitude, request.Longitude, p.Latitude, p.Longitude)
+            })
+            .Where(x => x.Distance <= request.RadiusInKm)
+            .OrderBy(x => x.Distance)
+            .ToList();
+
+       
+        return nearbyPharmacies.Select(x =>
         {
-            var dto = _mapper.Map<PharmacyDto>(p);
-            dto.Distance = CalculateDistance(request.Latitude, request.Longitude, p.Latitude, p.Longitude);
+            var dto = _mapper.Map<PharmacyDto>(x.Entity);
+            dto.Distance = Math.Round(x.Distance, 2);
             return dto;
-        }).OrderBy(p => p.Distance);
-        return pharmaciesWithDistance;
+        });
     }
 
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
