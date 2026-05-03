@@ -8,7 +8,7 @@ namespace Elaaj.Application.Interfaces
 {
     public interface INotificationService
     {
-        Task SendReplyNotification(string patientId,string message);
+        Task SendReplyNotification(string Id,string message);
         
     }
 }

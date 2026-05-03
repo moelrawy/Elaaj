@@ -3,8 +3,8 @@ namespace Elaaj.Application.Features.PostReplies.Commands.CreatePostReply
 {
     public class CreatePostReplyCommand : IRequest<Guid>
     {
-        public string PatientId { get; set; } 
-        public string ReplyContent { get; set; }
-        public string PostId { get; set; }
+        public required string ReceiverId { get; set; }
+        public required string ReplyContent { get; set; }
+        public int PostId { get; set; }
     }
 }
