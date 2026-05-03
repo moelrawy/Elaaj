@@ -18,6 +18,8 @@ namespace Elaaj.Domain.Entities
         public string WorkingHours { get; set; } = string.Empty;
         public bool HasDelivery { get; set; }
         public string ContactNumber { get; set; } = string.Empty;
+        public string OwnerId { get; set; } = default!;
+        public virtual User Owner { get; set; } = default!;
 
 
         public ICollection<PostReply> Replies { get; set; } = new List<PostReply>();

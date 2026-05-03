@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elaaj.infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260501124815_Prescription")]
-    partial class Prescription
+    [Migration("20260503120911_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,10 @@ namespace Elaaj.infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("WorkingHours")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -62,12 +66,15 @@ namespace Elaaj.infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OwnerId");
+
                     b.ToTable("Pharmacies");
                 });
 
             modelBuilder.Entity("Elaaj.Domain.Entities.PharmacyAdmin", b =>
                 {
                     b.Property<string>("UserId")
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("PharmacyId")
@@ -214,7 +221,7 @@ namespace Elaaj.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Prescription");
+                    b.ToTable("Prescriptions");
                 });
 
             modelBuilder.Entity("Elaaj.Domain.Entities.PrescriptionReply", b =>
@@ -248,7 +255,7 @@ namespace Elaaj.infrastructure.Migrations
 
                     b.HasIndex("PrescriptionId");
 
-                    b.ToTable("PrescriptionReply");
+                    b.ToTable("PrescriptionReplies");
                 });
 
             modelBuilder.Entity("Elaaj.Domain.Entities.User", b =>
@@ -258,6 +265,9 @@ namespace Elaaj.infrastructure.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -280,11 +290,17 @@ namespace Elaaj.infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -313,6 +329,9 @@ namespace Elaaj.infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("imageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -328,27 +347,21 @@ namespace Elaaj.infrastructure.Migrations
 
             modelBuilder.Entity("Elaaj.Domain.Entities.UserFavorite", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AddedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("PharmacyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "PharmacyId");
 
                     b.HasIndex("PharmacyId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserFavorites");
                 });
@@ -486,18 +499,29 @@ namespace Elaaj.infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Elaaj.Domain.Entities.Pharmacy", b =>
+                {
+                    b.HasOne("Elaaj.Domain.Entities.User", "Owner")
+                        .WithMany("OwnedPharmacies")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("Elaaj.Domain.Entities.PharmacyAdmin", b =>
                 {
                     b.HasOne("Elaaj.Domain.Entities.Pharmacy", "Pharmacy")
                         .WithMany("Admins")
                         .HasForeignKey("PharmacyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Elaaj.Domain.Entities.User", "User")
                         .WithMany("ManagedPharmacies")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Pharmacy");
@@ -585,11 +609,11 @@ namespace Elaaj.infrastructure.Migrations
                     b.HasOne("Elaaj.Domain.Entities.Pharmacy", "Pharmacy")
                         .WithMany()
                         .HasForeignKey("PharmacyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Elaaj.Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Favorites")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -673,7 +697,11 @@ namespace Elaaj.infrastructure.Migrations
 
             modelBuilder.Entity("Elaaj.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Favorites");
+
                     b.Navigation("ManagedPharmacies");
+
+                    b.Navigation("OwnedPharmacies");
 
                     b.Navigation("Posts");
                 });

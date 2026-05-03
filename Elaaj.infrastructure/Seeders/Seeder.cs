@@ -37,7 +37,7 @@ internal class Seeder(
 
     private async Task SeedRoles()
     {
-        string[] roles = [UserRoles.User, UserRoles.PharmacyAdmin, UserRoles.Owner];
+        string[] roles = [UserRoles.User, UserRoles.PharmacyAdmin, UserRoles.Owner,UserRoles.PharmacyOwner];
 
         foreach (var roleName in roles)
         {

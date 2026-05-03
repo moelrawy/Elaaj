@@ -20,6 +20,7 @@ namespace Elaaj.Application.Extensions
             services.AddAutoMapper(cfg => {
                 cfg.AddMaps(applicationAssembly);
             });
+            services.AddHttpContextAccessor();
             services.AddScoped<IUserContext, UserContext>();
             return services;
         }

@@ -33,6 +33,10 @@ namespace Elaaj.infrastructure.Repositories
         {
             return await _dbSet.ToListAsync();
         }
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> filter)
+        { 
+            return await _context.Set<T>().Where(filter).ToListAsync();
+        }
 
         public async Task<T?> GetByIdAsync(int id)
         {
