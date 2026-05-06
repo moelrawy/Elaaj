@@ -41,6 +41,7 @@ builder.Services.AddCors(options =>
 
 
 var app = builder.Build();
+app.UseStaticFiles();
 var scope = app.Services.CreateScope();
 var seeder = scope.ServiceProvider.GetRequiredService<ISeeder>();
 //CORS

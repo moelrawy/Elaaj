@@ -1,4 +1,5 @@
 ﻿using Elaaj.Application.Features.Posts.Commands.CreatePost;
+using Elaaj.Application.Features.Posts.Queries.GetAllPosts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ namespace Elaaj.API.Controllers
             _mediator = mediator;
         }
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePostCommand command)
+        public async Task<IActionResult> Create([FromForm] CreatePostCommand command)
         {
             
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -34,6 +35,15 @@ namespace Elaaj.API.Controllers
             var postId = await _mediator.Send(command);
 
             return Ok(new { PostId = postId, Message = "تم نشر استفسارك بنجاح." });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllPosts()
+        {
+            var query = new GetAllPostsQuery();
+            var result = await _mediator.Send(query);
+
+            return Ok(result);
         }
     }
 }

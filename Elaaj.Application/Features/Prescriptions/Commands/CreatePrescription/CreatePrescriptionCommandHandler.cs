@@ -1,4 +1,5 @@
-﻿using Elaaj.Domain.Entities;
+﻿using Elaaj.Application.Interfaces;
+using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
 using System;
@@ -12,18 +13,20 @@ namespace Elaaj.Application.Features.Prescriptions.Commands.CreatePrescription;
 public class CreatePrescriptionCommandHandler : IRequestHandler<CreatePrescriptionCommand, Guid>
 {
     private readonly IGenericRepository<Prescription> _repository;
+    private readonly IFileService _fileService;
 
-    public CreatePrescriptionCommandHandler(IGenericRepository<Prescription> repository)
+    public CreatePrescriptionCommandHandler(IGenericRepository<Prescription> repository,IFileService fileService)
     {
         _repository = repository;
+        _fileService = fileService;
     }
-
     public async Task<Guid> Handle(CreatePrescriptionCommand request, CancellationToken cancellationToken)
     {
+        var imageUrl = await _fileService.UploadFileAsync(request.File, "prescriptions");
         var prescription = new Prescription
         {
             UserId = request.UserId,
-            ImageUrl = request.ImageUrl,
+            ImageUrl = imageUrl,
             Notes = request.Notes,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
