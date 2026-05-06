@@ -1,12 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AutoMapper;
+using Elaaj.Application.Interfaces;
+using Elaaj.Application.Interfaces.Services;
+using Elaaj.Application.Users;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Elaaj.Application.Users;
 
 namespace Elaaj.Application.Extensions
 {
@@ -22,6 +24,7 @@ namespace Elaaj.Application.Extensions
             });
             services.AddHttpContextAccessor();
             services.AddScoped<IUserContext, UserContext>();
+            services.AddScoped<IFileService, FileService>();
             return services;
         }
     }

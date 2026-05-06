@@ -24,7 +24,7 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePrescriptionCommand command)
+        public async Task<IActionResult> Create([FromForm] CreatePrescriptionCommand command)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

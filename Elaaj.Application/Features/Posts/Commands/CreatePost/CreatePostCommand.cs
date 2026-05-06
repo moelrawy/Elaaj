@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,5 +18,5 @@ public class CreatePostCommand : IRequest<int>
     [MaxLength(1000, ErrorMessage = "الاستفسار طويل جداً.")]
     public string Content { get; set; } = string.Empty;
 
-    public string? ImageUrl { get; set; }
+    public IFormFile? File { get; set; }
 }
