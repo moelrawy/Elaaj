@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Elaaj.Application.Features.Prescriptions.DTOs;
+using Elaaj.Application.Users;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
@@ -17,32 +18,42 @@ public class GetNearbyPrescriptionsQueryHandler : IRequestHandler<GetNearbyPresc
     private readonly IGenericRepository<Pharmacy> _pharmacyRepository;
     private readonly IGenericRepository<PharmacyAdmin> _adminRepository;
     private readonly IMapper _mapper;
+    private readonly IUserContext _userContext;
 
     public GetNearbyPrescriptionsQueryHandler(
         IGenericRepository<Prescription> prescriptionRepository,
         IGenericRepository<Pharmacy> pharmacyRepository,
         IGenericRepository<PharmacyAdmin> adminRepository,
-        IMapper mapper)
+        IMapper mapper,
+        IUserContext userContext)
     {
         _prescriptionRepository = prescriptionRepository;
         _pharmacyRepository = pharmacyRepository;
         _adminRepository = adminRepository;
         _mapper = mapper;
+        _userContext = userContext;
     }
 
     public async Task<IEnumerable<PrescriptionDto>> Handle(GetNearbyPrescriptionsQuery request, CancellationToken cancellationToken)
     {
+        // 1. Get current user from Token, not from Request
+        var currentUser = _userContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
+
+        // 2. Verify that the current user is an admin of this pharmacy
         var isAdmin = await _adminRepository.GetFirstOrDefaultAsync(a =>
-            a.UserId == request.UserId && a.PharmacyId == request.PharmacyId);
+            a.UserId == currentUser.Id && a.PharmacyId == request.PharmacyId);
 
         if (isAdmin == null)
             throw new UnauthorizedAccessException("غير مصرح لك بالاطلاع على روشتات هذه الصيدلية.");
 
+        // 3. Verify pharmacy exists
         var pharmacy = await _pharmacyRepository.GetByIdAsync(request.PharmacyId);
         if (pharmacy == null)
             throw new ArgumentException("الصيدلية غير موجودة.");
 
-
+        // 4. Get only active (unresolved) prescriptions
         var allPrescriptions = await _prescriptionRepository.GetAllAsync();
         var activePrescriptions = allPrescriptions.Where(p => !p.IsResolved);
 

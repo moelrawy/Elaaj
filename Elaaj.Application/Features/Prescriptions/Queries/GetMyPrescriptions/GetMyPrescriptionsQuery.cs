@@ -10,6 +10,6 @@ namespace Elaaj.Application.Features.Prescriptions.Queries.GetMyPrescriptions
 {
     public class GetMyPrescriptionsQuery : IRequest<IEnumerable<MyPrescriptionDto>>
     {
-        public string UserId { get; set; } = string.Empty;
+        //public string UserId { get; set; } = string.Empty;
     }
 }

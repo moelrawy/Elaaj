@@ -11,7 +11,7 @@ namespace Elaaj.Application.Features.Prescriptions.Commands.CreatePrescription;
 
 public class CreatePrescriptionCommand : IRequest<Guid>
 {
-    public string UserId { get; set; } = string.Empty;
+    //public string UserId { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "يجب إرفاق صورة الروشتة.")]
     public IFormFile File { get; set; } = null!;

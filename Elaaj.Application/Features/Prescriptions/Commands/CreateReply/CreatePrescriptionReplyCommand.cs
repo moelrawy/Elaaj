@@ -8,7 +8,7 @@ public class CreatePrescriptionReplyCommand : IRequest<Guid>
 {
     public Guid PrescriptionId { get; set; } 
 
-    public string UserId { get; set; } = string.Empty;
+    //public string UserId { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "يجب تحديد الصيدلية التي ترد باسمها.")]
     public Guid PharmacyId { get; set; }

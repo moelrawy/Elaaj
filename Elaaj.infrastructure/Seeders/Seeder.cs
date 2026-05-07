@@ -10,25 +10,35 @@ namespace Elaaj.Infrastructure.Seeders;
 internal class Seeder(
     ApplicationDbContext dbContext,
     RoleManager<IdentityRole> roleManager,
-    UserManager<User> userManager) 
+    UserManager<User> userManager)
     : ISeeder
 {
     public async Task Seed()
     {
-        if (dbContext.Database.GetPendingMigrations().Any())
-        {
-            await dbContext.Database.MigrateAsync();
-        }
-
         if (await dbContext.Database.CanConnectAsync())
         {
+            // ✅ نحاول ننفذ الـ Migrations لو في pending
+            // لو الجداول موجودة بالفعل مش هيحصل حاجة
+            var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                try
+                {
+                    await dbContext.Database.MigrateAsync();
+                }
+                catch (Exception)
+                {
+                    // الجداول موجودة بالفعل، مش مشكلة نكمل
+                }
+            }
+
             // 1. Seed Roles
             if (!await dbContext.Roles.AnyAsync())
             {
                 await SeedRoles();
             }
 
-            // 2. Seed Admin User (Owner) - خطوة ضرورية عشان الـ OwnerId
+            // 2. Seed Admin User (Owner)
             var adminEmail = "admin@elaaj.com";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
@@ -41,14 +51,13 @@ internal class Seeder(
                     FullName = "Admin System",
                     EmailConfirmed = true
                 };
-                await userManager.CreateAsync(adminUser, "Password123!"); // باسوورد تجريبي
+                await userManager.CreateAsync(adminUser, "Password123!");
                 await userManager.AddToRoleAsync(adminUser, UserRoles.Owner);
             }
 
             // 3. Seed Pharmacies
             if (!await dbContext.Pharmacies.AnyAsync())
             {
-                // بنباصي الـ Id بتاع الـ adminUser للميثود
                 var pharmacies = GetPharmacies(adminUser.Id);
                 dbContext.Pharmacies.AddRange(pharmacies);
                 await dbContext.SaveChangesAsync();
@@ -69,7 +78,7 @@ internal class Seeder(
         }
     }
 
-    private IEnumerable<Pharmacy> GetPharmacies(string ownerId) // 👈 بنستقبل الـ Id هنا
+    private IEnumerable<Pharmacy> GetPharmacies(string ownerId)
     {
         return [
             new() {
@@ -81,7 +90,7 @@ internal class Seeder(
                 Longitude = 31.1836,
                 WorkingHours = "24/7",
                 HasDelivery = true,
-                OwnerId = ownerId // 👈 ربطنا الصيدلية بالـ Owner
+                OwnerId = ownerId
             },
             new() {
                 Name = "Care Pharmacy",
@@ -92,7 +101,7 @@ internal class Seeder(
                 Longitude = 31.1700,
                 WorkingHours = "08:00 AM - 12:00 AM",
                 HasDelivery = false,
-                OwnerId = ownerId // 👈 ربطنا الصيدلية بالـ Owner
+                OwnerId = ownerId
             }
         ];
     }
