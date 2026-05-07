@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Elaaj.Application.Features.Posts.DTOs;
+using Elaaj.Application.Models;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Posts.Queries.GetAllPosts;
 
-public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, IEnumerable<PostDto>>
+public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, PagedResult<PostDto>>
 {
     private readonly IGenericRepository<Post> _repository;
     private readonly IMapper _mapper;
@@ -22,12 +23,24 @@ public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, IEnumer
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<PostDto>> Handle(GetAllPostsQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<PostDto>> Handle(GetAllPostsQuery request, CancellationToken cancellationToken)
     {
-        var posts = await _repository.GetWhereAsync(x => true, p => p.Replies);
+        var (items, totalCount) = await _repository.GetPagedAsync(
+            request.PageNumber,
+            request.PageSize,
+            predicate: null, 
+            orderBy: q => q.OrderByDescending(p => p.CreatedAt),
+            includes: p => p.Replies
+        );
 
-        var orderedPosts = posts.OrderByDescending(p => p.CreatedAt);
+        var dtos = _mapper.Map<IEnumerable<PostDto>>(items);
 
-        return _mapper.Map<IEnumerable<PostDto>>(orderedPosts);
+        return new PagedResult<PostDto>
+        {
+            Items = dtos,
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
 }

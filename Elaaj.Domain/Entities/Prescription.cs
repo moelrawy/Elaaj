@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elaaj.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,8 +21,7 @@ public class Prescription
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // هل المريض وافق على عرض من صيدلية وقفل الطلب؟
-    public bool IsResolved { get; set; } = false;
+    public PrescriptionStatus Status { get; set; } = PrescriptionStatus.Pending;
 
     public ICollection<PrescriptionReply> Replies { get; set; } = new List<PrescriptionReply>();
 }

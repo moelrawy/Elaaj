@@ -1,5 +1,6 @@
 ﻿using Elaaj.Application.Interfaces;
 using Elaaj.Domain.Entities;
+using Elaaj.Domain.Enums;
 using Elaaj.Domain.Interfaces;
 using MediatR;
 using System;
@@ -40,7 +41,7 @@ public class CreatePrescriptionReplyCommandHandler : IRequestHandler<CreatePresc
         if (prescription == null)
             throw new ArgumentException("الروشتة غير موجودة.");
 
-        if (prescription.IsResolved)
+        if (prescription.Status != PrescriptionStatus.Pending)
             throw new InvalidOperationException("عذراً، لقد قام المريض بقبول عرض آخر وتم إغلاق هذه الروشتة.");
 
         var reply = new PrescriptionReply

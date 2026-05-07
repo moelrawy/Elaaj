@@ -75,5 +75,31 @@ namespace Elaaj.infrastructure.Repositories
 
             return await query.ToListAsync();
         }
+        public async Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            foreach (var include in includes)
+                query = query.Include(include);
+
+            int totalCount = await query.CountAsync();
+
+            if (orderBy != null)
+                query = orderBy(query);
+
+            var items = await query.Skip((pageNumber - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }

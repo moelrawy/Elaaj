@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Elaaj.Application.Features.Prescriptions.DTOs;
+using Elaaj.Application.Models;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Prescriptions.Queries.GetMyPrescriptions;
 
-public class GetMyPrescriptionsQueryHandler : IRequestHandler<GetMyPrescriptionsQuery, IEnumerable<MyPrescriptionDto>>
+public class GetMyPrescriptionsQueryHandler : IRequestHandler<GetMyPrescriptionsQuery, PagedResult<MyPrescriptionDto>>
 {
     private readonly IGenericRepository<Prescription> _prescriptionRepository;
     private readonly IMapper _mapper;
@@ -22,18 +23,26 @@ public class GetMyPrescriptionsQueryHandler : IRequestHandler<GetMyPrescriptions
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<MyPrescriptionDto>> Handle(GetMyPrescriptionsQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<MyPrescriptionDto>> Handle(GetMyPrescriptionsQuery request, CancellationToken cancellationToken)
     {
-        // استخدام الدالة الجديدة لجلب الروشتات الخاصة بالمستخدم + دمج الردود + دمج الصيدليات التابعة للردود
-        // ملحوظة: الـ Entity Framework ذكي، لما بتـ Include الردود، تقدر تجيب بيانات الـ Navigation Properties اللي جواها
-        var prescriptions = await _prescriptionRepository.GetWhereAsync(
-            p => p.UserId == request.UserId,
-            p => p.Replies 
+        var (items, totalCount) = await _prescriptionRepository.GetPagedAsync(
+            request.PageNumber,
+            request.PageSize,
+            predicate: p => p.UserId == request.UserId, 
+            orderBy: q => q.OrderByDescending(p => p.CreatedAt), 
+            includes: p => p.Replies 
         );
 
-        // الترتيب: الأحدث أولاً
-        var orderedPrescriptions = prescriptions.OrderByDescending(p => p.CreatedAt);
+        // التحويل لـ DTO
+        var dtos = _mapper.Map<IEnumerable<MyPrescriptionDto>>(items);
 
-        return _mapper.Map<IEnumerable<MyPrescriptionDto>>(orderedPrescriptions);
+        // تغليف الداتا في الـ PagedResult
+        return new PagedResult<MyPrescriptionDto>
+        {
+            Items = dtos,
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
 }

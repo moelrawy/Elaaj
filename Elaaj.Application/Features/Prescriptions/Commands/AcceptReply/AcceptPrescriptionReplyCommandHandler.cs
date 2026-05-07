@@ -1,4 +1,5 @@
 ﻿using Elaaj.Domain.Entities;
+using Elaaj.Domain.Enums;
 using Elaaj.Domain.Interfaces;
 using MediatR;
 using System;
@@ -30,7 +31,7 @@ public class AcceptPrescriptionReplyCommandHandler : IRequestHandler<AcceptPresc
         if (prescription.UserId != request.UserId)
             throw new UnauthorizedAccessException("غير مصرح لك باتخاذ قرار بشأن هذه الروشتة.");
 
-        if (prescription.IsResolved)
+        if (prescription.Status != PrescriptionStatus.Pending)
             throw new InvalidOperationException("تم إغلاق هذه الروشتة مسبقاً.");
 
         var reply = await _replyRepository.GetByIdAsync(request.ReplyId);
@@ -38,12 +39,12 @@ public class AcceptPrescriptionReplyCommandHandler : IRequestHandler<AcceptPresc
         if (reply == null || reply.PrescriptionId != request.PrescriptionId)
             throw new ArgumentException("هذا العرض غير صحيح أو لا ينتمي لهذه الروشتة.");
 
-        prescription.IsResolved = true;
+        prescription.Status = PrescriptionStatus.Accepted;
 
         _prescriptionRepository.Update(prescription);
         await _prescriptionRepository.SaveChangesAsync();
 
-        // 🚀 مستقبلاً مع SignalR: هنا هنبعت إشعار للصيدلية المحددة عشان يجهزوا الدواء
+        //  مستقبلاً مع SignalR: هنا هنبعت إشعار للصيدلية المحددة عشان يجهزوا الدواء
 
         return true;
     }
