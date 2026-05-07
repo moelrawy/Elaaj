@@ -9,7 +9,9 @@ namespace Elaaj.Application.Interfaces
     public interface INotificationService
     {
         Task SendReplyNotification(string Id,string message);
-        
+
+        Task SendToUserAsync(string userId, string message);
+        Task SendToGroupAsync(string groupName, string message);
     }
 }
 
