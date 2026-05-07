@@ -5,8 +5,8 @@ using Elaaj.Application.Features.Prescriptions.Queries.GetMyPrescriptions;
 using Elaaj.Application.Features.Prescriptions.Queries.GetNearbyPrescriptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Restaurants.Domain.Constants;
 using System.Security.Claims;
 
 namespace Elaaj.API.Controllers
@@ -24,17 +24,9 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{UserRoles.User}")]
         public async Task<IActionResult> Create([FromForm] CreatePrescriptionCommand command)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new { Message = "برجاء تسجيل الدخول أولاً." });
-            }
-
-            command.UserId = userId;
-
             var prescriptionId = await _mediator.Send(command);
 
             return Ok(new
@@ -47,12 +39,8 @@ namespace Elaaj.API.Controllers
         [HttpGet("nearby/{pharmacyId}")]
         public async Task<IActionResult> GetNearbyPrescriptions(Guid pharmacyId, [FromQuery] double radius = 5)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
             var query = new GetNearbyPrescriptionsQuery
             {
-                UserId = userId,
                 PharmacyId = pharmacyId,
                 RadiusInKm = radius
             };
@@ -72,16 +60,13 @@ namespace Elaaj.API.Controllers
             }
         }
 
-
+        // Only pharmacy staff can add a reply
         [HttpPost("{id}/replies")]
+        [Authorize(Roles = $"{UserRoles.PharmacyOwner},{UserRoles.PharmacyAdmin}")]
         public async Task<IActionResult> AddReply(Guid id, [FromBody] CreatePrescriptionReplyCommand command)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
             command.PrescriptionId = id;
-            command.UserId = userId;
-
+      
             try
             {
                 var replyId = await _mediator.Send(command);
@@ -98,17 +83,15 @@ namespace Elaaj.API.Controllers
         }
 
 
+        // Only the prescription owner (User) can accept a reply
         [HttpPut("{prescriptionId}/replies/{replyId}/accept")]
+        [Authorize(Roles = $"{UserRoles.User}")]
         public async Task<IActionResult> AcceptReply(Guid prescriptionId, Guid replyId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
             var command = new AcceptPrescriptionReplyCommand
             {
                 PrescriptionId = prescriptionId,
                 ReplyId = replyId,
-                UserId = userId
             };
 
             try
@@ -126,13 +109,12 @@ namespace Elaaj.API.Controllers
             }
         }
 
+        // Only the logged in user can see their own prescriptions
         [HttpGet("my-prescriptions")]
+        [Authorize(Roles = $"{UserRoles.User}")]
         public async Task<IActionResult> GetMyPrescriptions()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            var query = new GetMyPrescriptionsQuery { UserId = userId };
+            var query = new GetMyPrescriptionsQuery();
 
             var result = await _mediator.Send(query);
 

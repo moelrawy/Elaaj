@@ -22,18 +22,9 @@ namespace Elaaj.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreatePostCommand command)
         {
-            
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new { Message = "برجاء تسجيل الدخول أولاً." });
-            }
-
-            command.UserId = userId;
-
+            // No need to get userId here, Handler gets it from Token
             var postId = await _mediator.Send(command);
-
             return Ok(new { PostId = postId, Message = "تم نشر استفسارك بنجاح." });
         }
 
