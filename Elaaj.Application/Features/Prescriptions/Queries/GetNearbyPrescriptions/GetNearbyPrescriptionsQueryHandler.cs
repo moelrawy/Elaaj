@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Elaaj.Application.Features.Prescriptions.DTOs;
 using Elaaj.Domain.Entities;
+using Elaaj.Domain.Enums;
 using Elaaj.Domain.Interfaces;
 using MediatR;
 using System;
@@ -44,7 +45,7 @@ public class GetNearbyPrescriptionsQueryHandler : IRequestHandler<GetNearbyPresc
 
 
         var allPrescriptions = await _prescriptionRepository.GetAllAsync();
-        var activePrescriptions = allPrescriptions.Where(p => !p.IsResolved);
+        var activePrescriptions = allPrescriptions.Where(p => p.Status == PrescriptionStatus.Pending);
 
         var nearbyPrescriptions = activePrescriptions
             .Select(p =>

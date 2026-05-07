@@ -1,5 +1,6 @@
 ﻿using Elaaj.Application.Interfaces;
 using Elaaj.Application.Models;
+using Elaaj.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -15,10 +16,10 @@ namespace Elaaj.infrastructure.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<User> _userManager;
     private readonly JwtSettings _jwtSettings;
 
-    public AuthService(UserManager<IdentityUser> userManager, IOptions<JwtSettings> jwtSettings)
+    public AuthService(UserManager<User> userManager, IOptions<JwtSettings> jwtSettings)
     {
         _userManager = userManager;
         _jwtSettings = jwtSettings.Value;
@@ -33,7 +34,7 @@ public class AuthService : IAuthService
         return GenerateJwtToken(user);
     }
 
-    private string GenerateJwtToken(IdentityUser user)
+    private string GenerateJwtToken(User user)
     {
         var claims = new List<Claim>
         {

@@ -1,8 +1,10 @@
 ﻿using Elaaj.Application.Features.Prescriptions.Commands.AcceptReply;
 using Elaaj.Application.Features.Prescriptions.Commands.CreatePrescription;
 using Elaaj.Application.Features.Prescriptions.Commands.CreateReply;
+using Elaaj.Application.Features.Prescriptions.Commands.UpdatePrescriptionStatus;
 using Elaaj.Application.Features.Prescriptions.Queries.GetMyPrescriptions;
 using Elaaj.Application.Features.Prescriptions.Queries.GetNearbyPrescriptions;
+using Elaaj.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -127,16 +129,44 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpGet("my-prescriptions")]
-        public async Task<IActionResult> GetMyPrescriptions()
+        public async Task<IActionResult> GetMyPrescriptions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var query = new GetMyPrescriptionsQuery { UserId = userId };
+            var query = new GetMyPrescriptionsQuery
+            {
+                UserId = userId,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
 
             var result = await _mediator.Send(query);
-
             return Ok(result);
+        }
+
+        [HttpPatch("{id}/status")] 
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] PrescriptionStatus newStatus)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var command = new UpdatePrescriptionStatusCommand
+            {
+                PrescriptionId = id,
+                NewStatus = newStatus,
+                UserId = userId
+            };
+
+            try
+            {
+                await _mediator.Send(command);
+                return Ok(new { Message = "تم تحديث حالة الطلب بنجاح." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
     }
 }

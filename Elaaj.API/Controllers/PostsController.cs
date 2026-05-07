@@ -38,9 +38,15 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPosts()
+        //  بنستقبل رقم الصفحة وحجمها، ولو الموبايل مبعتهمش هياخد 1 و 10 كافتراضي
+        public async Task<IActionResult> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var query = new GetAllPostsQuery();
+            var query = new GetAllPostsQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
             var result = await _mediator.Send(query);
 
             return Ok(result);

@@ -18,6 +18,12 @@ namespace Elaaj.Domain.Interfaces
         void Delete(T entity);
         Task<int> SaveChangesAsync();
         Task<T?> GetByIdAsync(Guid id);
+        Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, 
+            params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
         
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
