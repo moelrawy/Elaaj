@@ -1,21 +1,18 @@
+using Elaaj.API.Extensions;
 using Elaaj.API.Extentions;
-using Elaaj.API.Hubs;
 using Elaaj.API.Middlewares;
 using Elaaj.API.Services;
 using Elaaj.Application.Extensions;
 using Elaaj.Application.Interfaces;
 using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data;
+using Elaaj.infrastructure.Hubs;
 using Elaaj.infrastructure.Seeders;
 using Elaaj.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-//Add SignalR services
-builder.Services.AddSignalR();
-// Add services to the container.
-
-
+builder.Services.AddIdentityServices(builder.Configuration);
 builder.AddPresentation();
 
 // MediatR
@@ -25,6 +22,8 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+
+builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 // CORS
 builder.Services.AddCors(options =>

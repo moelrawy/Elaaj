@@ -1,4 +1,5 @@
-﻿using Elaaj.Domain.Entities;
+﻿using Elaaj.Application.Interfaces;
+using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
 using System;
@@ -12,15 +13,18 @@ public class CreatePrescriptionReplyCommandHandler : IRequestHandler<CreatePresc
     private readonly IGenericRepository<PrescriptionReply> _replyRepository;
     private readonly IGenericRepository<PharmacyAdmin> _adminRepository;
     private readonly IGenericRepository<Prescription> _prescriptionRepository;
+    private readonly INotificationService _notificationService;
 
     public CreatePrescriptionReplyCommandHandler(
         IGenericRepository<PrescriptionReply> replyRepository,
         IGenericRepository<PharmacyAdmin> adminRepository,
-        IGenericRepository<Prescription> prescriptionRepository)
+        IGenericRepository<Prescription> prescriptionRepository,
+        INotificationService notificationService)
     {
         _replyRepository = replyRepository;
         _adminRepository = adminRepository;
         _prescriptionRepository = prescriptionRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<Guid> Handle(CreatePrescriptionReplyCommand request, CancellationToken cancellationToken)
@@ -51,6 +55,16 @@ public class CreatePrescriptionReplyCommandHandler : IRequestHandler<CreatePresc
 
         await _replyRepository.AddAsync(reply);
         await _replyRepository.SaveChangesAsync();
+
+
+        if (prescription != null)
+        {
+            string msg = request.TotalPrice.HasValue
+                ? $"صيدلية جديدة قامت بالرد على روشتتك. السعر الإجمالي: {request.TotalPrice} جنيه."
+                : "صيدلية جديدة قامت بالرد على روشتتك وتؤكد توافر الأدوية.";
+
+            await _notificationService.SendToUserAsync(prescription.UserId, msg);
+        }
 
         return reply.Id;
     }
