@@ -25,6 +25,7 @@ builder.Services.AddApplication();
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddSwaggerDocumentation();
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -55,8 +56,10 @@ await seeder.Seed();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
-   
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Elaaj API v1");
+    });
 }
 
 app.UseHttpsRedirection();
