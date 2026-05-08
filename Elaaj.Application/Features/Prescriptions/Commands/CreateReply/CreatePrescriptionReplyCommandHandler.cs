@@ -1,4 +1,5 @@
 ﻿using Elaaj.Application.Interfaces;
+using Elaaj.Application.Users;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Enums;
 using Elaaj.Domain.Interfaces;
@@ -15,23 +16,30 @@ public class CreatePrescriptionReplyCommandHandler : IRequestHandler<CreatePresc
     private readonly IGenericRepository<PharmacyAdmin> _adminRepository;
     private readonly IGenericRepository<Prescription> _prescriptionRepository;
     private readonly INotificationService _notificationService;
+    private readonly IUserContext _userContext;
 
     public CreatePrescriptionReplyCommandHandler(
         IGenericRepository<PrescriptionReply> replyRepository,
         IGenericRepository<PharmacyAdmin> adminRepository,
         IGenericRepository<Prescription> prescriptionRepository,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IUserContext userContext)
     {
         _replyRepository = replyRepository;
         _adminRepository = adminRepository;
         _prescriptionRepository = prescriptionRepository;
         _notificationService = notificationService;
+        _userContext = userContext;
     }
 
     public async Task<Guid> Handle(CreatePrescriptionReplyCommand request, CancellationToken cancellationToken)
     {
+        var currentUser = _userContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
+
         var isAdmin = await _adminRepository.GetFirstOrDefaultAsync(a =>
-            a.UserId == request.UserId && a.PharmacyId == request.PharmacyId);
+            a.UserId == currentUser.Id && a.PharmacyId == request.PharmacyId);
 
         if (isAdmin == null)
             throw new UnauthorizedAccessException("غير مصرح لك بالرد باسم هذه الصيدلية.");

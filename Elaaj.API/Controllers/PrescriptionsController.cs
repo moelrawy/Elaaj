@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Restaurants.Domain.Constants;
 using System.Security.Claims;
 
 namespace Elaaj.API.Controllers
@@ -26,16 +27,9 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{UserRoles.User}")]
         public async Task<IActionResult> Create([FromForm] CreatePrescriptionCommand command)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new { Message = "برجاء تسجيل الدخول أولاً." });
-            }
-
-            command.UserId = userId;
 
             var prescriptionId = await _mediator.Send(command);
 
@@ -45,16 +39,14 @@ namespace Elaaj.API.Controllers
                 Message = "تم إرسال روشتتك للصيدليات القريبة بنجاح، في انتظار الردود."
             });
         }
-
+        //this endpoint is for pharmacy staff to get nearby prescriptions to their pharmacy, they can specify a radius in km, default is 5km
         [HttpGet("nearby/{pharmacyId}")]
         public async Task<IActionResult> GetNearbyPrescriptions(Guid pharmacyId, [FromQuery] double radius = 5)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            
 
             var query = new GetNearbyPrescriptionsQuery
             {
-                UserId = userId,
                 PharmacyId = pharmacyId,
                 RadiusInKm = radius
             };
@@ -76,14 +68,10 @@ namespace Elaaj.API.Controllers
 
 
         [HttpPost("{id}/replies")]
+        [Authorize(Roles = $"{UserRoles.PharmacyOwner},{UserRoles.PharmacyAdmin}")]
         public async Task<IActionResult> AddReply(Guid id, [FromBody] CreatePrescriptionReplyCommand command)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
             command.PrescriptionId = id;
-            command.UserId = userId;
-
             try
             {
                 var replyId = await _mediator.Send(command);
@@ -103,14 +91,11 @@ namespace Elaaj.API.Controllers
         [HttpPut("{prescriptionId}/replies/{replyId}/accept")]
         public async Task<IActionResult> AcceptReply(Guid prescriptionId, Guid replyId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var command = new AcceptPrescriptionReplyCommand
             {
                 PrescriptionId = prescriptionId,
                 ReplyId = replyId,
-                UserId = userId
             };
 
             try
@@ -129,14 +114,12 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpGet("my-prescriptions")]
+        [Authorize(Roles = $"{UserRoles.User}")]
         public async Task<IActionResult> GetMyPrescriptions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var query = new GetMyPrescriptionsQuery
             {
-                UserId = userId,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             };
@@ -148,14 +131,11 @@ namespace Elaaj.API.Controllers
         [HttpPatch("{id}/status")] 
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] PrescriptionStatus newStatus)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var command = new UpdatePrescriptionStatusCommand
             {
                 PrescriptionId = id,
                 NewStatus = newStatus,
-                UserId = userId
             };
 
             try

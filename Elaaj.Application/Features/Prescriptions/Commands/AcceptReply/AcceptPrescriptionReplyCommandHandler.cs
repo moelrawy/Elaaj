@@ -1,4 +1,5 @@
-﻿using Elaaj.Domain.Entities;
+﻿using Elaaj.Application.Users;
+using Elaaj.Domain.Entities;
 using Elaaj.Domain.Enums;
 using Elaaj.Domain.Interfaces;
 using MediatR;
@@ -12,26 +13,33 @@ public class AcceptPrescriptionReplyCommandHandler : IRequestHandler<AcceptPresc
 {
     private readonly IGenericRepository<Prescription> _prescriptionRepository;
     private readonly IGenericRepository<PrescriptionReply> _replyRepository;
+    private readonly IUserContext _userContext;
 
     public AcceptPrescriptionReplyCommandHandler(
         IGenericRepository<Prescription> prescriptionRepository,
-        IGenericRepository<PrescriptionReply> replyRepository)
+        IGenericRepository<PrescriptionReply> replyRepository,
+        IUserContext userContext)
     {
         _prescriptionRepository = prescriptionRepository;
         _replyRepository = replyRepository;
+        _userContext = userContext;
     }
 
     public async Task<bool> Handle(AcceptPrescriptionReplyCommand request, CancellationToken cancellationToken)
     {
+        var currentUser = _userContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
+
         var prescription = await _prescriptionRepository.GetByIdAsync(request.PrescriptionId);
 
         if (prescription == null)
             throw new ArgumentException("الروشتة غير موجودة.");
 
-        if (prescription.UserId != request.UserId)
+        if (prescription.UserId != currentUser.Id)
             throw new UnauthorizedAccessException("غير مصرح لك باتخاذ قرار بشأن هذه الروشتة.");
 
-        if (prescription.Status != PrescriptionStatus.Pending)
+        if (prescription.Status == PrescriptionStatus.Cancelled)
             throw new InvalidOperationException("تم إغلاق هذه الروشتة مسبقاً.");
 
         var reply = await _replyRepository.GetByIdAsync(request.ReplyId);

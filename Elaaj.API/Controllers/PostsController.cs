@@ -22,15 +22,6 @@ namespace Elaaj.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreatePostCommand command)
         {
-            
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new { Message = "برجاء تسجيل الدخول أولاً." });
-            }
-
-            command.UserId = userId;
 
             var postId = await _mediator.Send(command);
 
@@ -38,7 +29,6 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpGet]
-        //  بنستقبل رقم الصفحة وحجمها، ولو الموبايل مبعتهمش هياخد 1 و 10 كافتراضي
         public async Task<IActionResult> GetAllPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var query = new GetAllPostsQuery

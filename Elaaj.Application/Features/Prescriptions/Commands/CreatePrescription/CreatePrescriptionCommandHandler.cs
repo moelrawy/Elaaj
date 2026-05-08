@@ -1,7 +1,9 @@
 ﻿using Elaaj.Application.Interfaces;
+using Elaaj.Application.Users;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
+using Restaurants.Domain.Constants;
 using System;
 using System.Linq;
 using System.Threading;
@@ -16,28 +18,38 @@ public class CreatePrescriptionCommandHandler : IRequestHandler<CreatePrescripti
     private readonly IGenericRepository<PharmacyAdmin> _adminRepository;
     private readonly IFileService _fileService;
     private readonly INotificationService _notificationService;
-
+    private readonly IUserContext _userContext;
     public CreatePrescriptionCommandHandler(
         IGenericRepository<Prescription> prescriptionRepository,
         IGenericRepository<Pharmacy> pharmacyRepository,
         IGenericRepository<PharmacyAdmin> adminRepository,
         IFileService fileService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IUserContext userContext)
     {
         _prescriptionRepository = prescriptionRepository;
         _pharmacyRepository = pharmacyRepository;
         _adminRepository = adminRepository;
         _fileService = fileService;
         _notificationService = notificationService;
+        _userContext = userContext;
     }
 
     public async Task<Guid> Handle(CreatePrescriptionCommand request, CancellationToken cancellationToken)
     {
+        var currentUser = _userContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
+
+        if (currentUser.IsInRole(UserRoles.PharmacyOwner) || currentUser.IsInRole(UserRoles.PharmacyAdmin))
+            throw new UnauthorizedAccessException("الصيدلاني لا يمكنه إرسال روشتة");
+
+
         var imageUrl = await _fileService.UploadFileAsync(request.File, "prescriptions");
 
         var prescription = new Prescription
         {
-            UserId = request.UserId,
+            UserId = currentUser.Id,
             ImageUrl = imageUrl,
             Notes = request.Notes,
             Latitude = request.Latitude,

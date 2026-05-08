@@ -12,7 +12,7 @@ namespace Elaaj.Application.Features.Posts.Commands.CreatePost;
 public class CreatePostCommand : IRequest<int>
 {
     
-    public string UserId { get; set; } = string.Empty;
+    //public string UserId { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "محتوى الاستفسار مطلوب.")]
     [MaxLength(1000, ErrorMessage = "الاستفسار طويل جداً.")]
