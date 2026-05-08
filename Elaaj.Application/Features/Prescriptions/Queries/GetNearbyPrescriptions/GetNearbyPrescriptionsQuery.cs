@@ -10,7 +10,7 @@ namespace Elaaj.Application.Features.Prescriptions.Queries.GetNearbyPrescription
 
 public class GetNearbyPrescriptionsQuery : IRequest<IEnumerable<PrescriptionDto>>
 {
-    public string UserId { get; set; } = string.Empty;
+    //public string UserId { get; set; } = string.Empty;
     public Guid PharmacyId { get; set; }
     public double RadiusInKm { get; set; } = 5;
 }
