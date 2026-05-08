@@ -41,9 +41,6 @@ public class CreatePrescriptionCommandHandler : IRequestHandler<CreatePrescripti
         if (currentUser == null)
             throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
 
-        if (currentUser.IsInRole(UserRoles.PharmacyOwner) || currentUser.IsInRole(UserRoles.PharmacyAdmin))
-            throw new UnauthorizedAccessException("الصيدلاني لا يمكنه إرسال روشتة");
-
 
         var imageUrl = await _fileService.UploadFileAsync(request.File, "prescriptions");
 

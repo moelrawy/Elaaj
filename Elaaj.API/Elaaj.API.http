@@ -39,7 +39,7 @@ GET {{Elaaj.API_HostAddress}}/api/pharmacies
 
 ###
 
-@id=4
+@id=7188e882-510b-4641-7de2-08dea95116d8
 GET {{Elaaj.API_HostAddress}}/api/pharmacies/{{id}}
 
 ###
@@ -47,7 +47,6 @@ PUT {{Elaaj.API_HostAddress}}/api/pharmacies/{{id}}
 Content-Type: application/json
 
 {
-  "Id" : 1,
   "name": "Assiut Pharmacy"
 }
 
