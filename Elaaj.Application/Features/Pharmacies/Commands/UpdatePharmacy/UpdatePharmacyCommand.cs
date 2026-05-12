@@ -3,12 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Pharmacies.Commands.UpdatePharmacy;
 
 public class UpdatePharmacyCommand : IRequest<bool>
 {
+    [JsonIgnore]
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string imageUrl { get; set; } = string.Empty;

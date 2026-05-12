@@ -1,4 +1,4 @@
-﻿using Restaurants.Domain.Constants;
+﻿using Elaaj.Domain.Constants;
 
 namespace Elaaj.Domain.Entities;
 

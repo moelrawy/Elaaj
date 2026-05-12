@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,10 +30,32 @@ public class AuthService : IAuthService
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             return null;
 
-        return GenerateJwtToken(user);
+        // Generate token with roles
+        return await GenerateJwtToken(user);
     }
 
-    private string GenerateJwtToken(User user)
+    public async Task<string?> RegisterAsync(string fullName, string email, string password)
+    {
+        var user = new User
+        {
+            UserName = email,
+            Email = email,
+            FullName = fullName
+        };
+
+        var result = await _userManager.CreateAsync(user, password);
+
+        if (result.Succeeded)
+        {
+            // Generate token with roles
+            return await GenerateJwtToken(user);
+        }
+
+        return null;
+    }
+
+    // ✅ Made async to fetch roles from Database
+    private async Task<string> GenerateJwtToken(User user)
     {
         var claims = new List<Claim>
         {
@@ -42,6 +63,13 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.Email, user.Email!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
+
+        // ✅ Get user roles from Database and add them to Token
+        var roles = await _userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

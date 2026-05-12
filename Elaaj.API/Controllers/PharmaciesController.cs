@@ -6,11 +6,11 @@ using Elaaj.Application.Features.Pharmacies.Queries.GetNearbyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacy;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacyById;
 using Elaaj.Application.Users;
+using Elaaj.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Restaurants.Domain.Constants;
+
 
 namespace Elaaj.API.Controllers
 {
@@ -70,7 +70,8 @@ namespace Elaaj.API.Controllers
         [Authorize(Roles = $"{UserRoles.Owner},{UserRoles.PharmacyOwner}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePharmacyCommand command)
         {
-            if (id != command.Id) return BadRequest(new { Message = "الـ ID غير متطابق" });
+            //if (id != command.Id) return BadRequest(new { Message = "الـ ID غير متطابق" });
+            command.Id = id;
 
             var success = await _mediator.Send(command);
 

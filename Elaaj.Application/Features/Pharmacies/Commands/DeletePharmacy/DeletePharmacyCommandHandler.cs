@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Elaaj.Application.Users;
+using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
-using Restaurants.Domain.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;

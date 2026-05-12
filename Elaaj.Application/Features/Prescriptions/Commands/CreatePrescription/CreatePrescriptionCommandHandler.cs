@@ -3,7 +3,6 @@ using Elaaj.Application.Users;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
-using Restaurants.Domain.Constants;
 using System;
 using System.Linq;
 using System.Threading;
