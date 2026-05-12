@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elaaj.Application.Features.Users.UserDtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace Elaaj.Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<string?> RegisterAsync(string fullName, string email, string password);
+    Task<AuthResult?> RegisterAsync(string fullName, string email, string password);
     Task<string?> LoginAsync(string email, string password);
 }

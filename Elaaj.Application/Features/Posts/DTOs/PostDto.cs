@@ -9,7 +9,7 @@ namespace Elaaj.Application.Features.Posts.DTOs;
 
 public record PostDto
 {
-    public Guid Id { get; init; }
+    public int Id { get; init; }
     public string UserId { get; init; } = string.Empty;
     public string Content { get; init; } = string.Empty;
     public string? ImageUrl { get; init; }

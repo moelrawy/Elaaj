@@ -22,7 +22,7 @@ public class GetUserDetailsQueryHandler(
 
         // 2. ندور على اليوزر في الداتابيز
         var user = await userManager.FindByIdAsync(userId);
-
+            
         if (user == null) return null;
 
         // 3. نحول بيانات اليوزر لـ DTO عشان نبعتها

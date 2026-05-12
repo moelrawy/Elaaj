@@ -32,14 +32,13 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
     {
-        // الـ FluentValidation هيشتغل لوحده هنا قبل ما السطر اللي تحت يتنفذ
-        var token = await _mediator.Send(command);
+        var authResult = await _mediator.Send(command);
 
-        if (token == null)
+        if (!authResult.Success)
         {
-            return BadRequest(new { Message = "فشل التسجيل. تأكد من البيانات أو أن الإيميل غير مستخدم." });
+            return BadRequest(new { Errors = authResult.Errors, Message = "فشل إنشاء الحساب" });
         }
 
-        return Ok(new { Token = token, Message = "تم إنشاء الحساب بنجاح" });
+        return Ok(new { Token = authResult.Token, Message = "تم إنشاء الحساب بنجاح" });
     }
 }

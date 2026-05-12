@@ -1,14 +1,34 @@
-﻿using Elaaj.Application.Interfaces;
+﻿using Elaaj.Application.Features.Users.UserDtos;
+using Elaaj.Application.Interfaces;
+using FluentValidation;
 using MediatR;
 
 namespace Elaaj.Application.Features.Users.Commands.RegisterUser;
 
-public class RegisterUserCommandHandler(IAuthService authService)
-    : IRequestHandler<RegisterUserCommand, string?>
+public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, AuthResult?>
 {
-    public async Task<string?> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    private readonly IAuthService _authService;
+    private readonly IValidator<RegisterUserCommand> _validator;
+
+    public RegisterUserCommandHandler(
+        IAuthService authService,
+        IValidator<RegisterUserCommand> validator)
     {
-        // بينادي الـ Service اللي إحنا جهزناها قبل كدة
-        return await authService.RegisterAsync(request.FullName, request.Email, request.Password);
+        _authService = authService;
+        _validator = validator;
+    }
+    public async Task<AuthResult?> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    {
+        var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return new AuthResult
+            {
+                Success = false,
+                Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
+            };
+        }
+        return await _authService.RegisterAsync(request.FullName, request.Email, request.Password);
     }
 }

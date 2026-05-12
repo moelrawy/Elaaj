@@ -9,6 +9,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
+using Elaaj.Application.Features.Users.Commands.RegisterUser;
+using Elaaj.Application.Features.Identity;
 
 namespace Elaaj.Application.Extensions
 {
@@ -25,6 +28,7 @@ namespace Elaaj.Application.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<IUserContext, UserContext>();
             services.AddScoped<IFileService, FileService>();
+            services.AddTransient<IValidator<RegisterUserCommand>, RegisterUserCommandValidator>();
             return services;
         }
     }

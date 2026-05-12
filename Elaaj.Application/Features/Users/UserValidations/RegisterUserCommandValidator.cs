@@ -17,7 +17,7 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("كلمة المرور مطلوبة")
-            .MinimumLength(6).WithMessage("كلمة المرور يجب ألا تقل عن 6 رموز");
+            .MinimumLength(6).WithMessage("كلمة المرور يجب ألا تقل عن 6 أحرف");
 
         // هنا بنعمل الـ Confirm Password اللي كنت بتسأل عليه
         RuleFor(x => x.ConfirmPassword)

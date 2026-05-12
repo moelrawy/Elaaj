@@ -1,4 +1,5 @@
-﻿using Elaaj.Application.Interfaces;
+﻿using Elaaj.Application.Features.Users.UserDtos;
+using Elaaj.Application.Interfaces;
 using Elaaj.Application.Models;
 using Elaaj.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -34,9 +35,9 @@ public class AuthService : IAuthService
         return await GenerateJwtToken(user);
     }
 
-    public async Task<string?> RegisterAsync(string fullName, string email, string password)
+    public async Task<AuthResult?> RegisterAsync(string fullName, string email, string password)
     {
-        var user = new User
+        User user = new User
         {
             UserName = email,
             Email = email,
@@ -45,13 +46,24 @@ public class AuthService : IAuthService
 
         var result = await _userManager.CreateAsync(user, password);
 
-        if (result.Succeeded)
-        {
-            // Generate token with roles
-            return await GenerateJwtToken(user);
-        }
 
-        return null;
+        if (!result.Succeeded)
+        {
+            return new AuthResult
+            {
+                Success = false,
+                Errors = result.Errors
+                    .Select(e => e.Description)
+                    .ToList()
+            };
+        }
+        string token = await GenerateJwtToken(user);
+
+        return new AuthResult
+        {
+            Success = true,
+            Token = token
+        };
     }
 
     // ✅ Made async to fetch roles from Database
