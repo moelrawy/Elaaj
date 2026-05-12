@@ -5,7 +5,7 @@ using Elaaj.Application.Users; // الـ Namespace بتاع الـ UserContext
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
-using Restaurants.Domain.Constants; // الـ Namespace بتاع الـ UserRoles
+
 
 namespace Elaaj.Application.Features.Pharmacies.Queries.GetAllPharmacies;
 

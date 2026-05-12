@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Elaaj.Application.Features.PostReplies.DTOs;
 using Elaaj.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Elaaj.Application.Features.Posts.DTOs
         public PostProfile()
         {
             CreateMap<Post, PostDto>();
+
         }
     }
 }

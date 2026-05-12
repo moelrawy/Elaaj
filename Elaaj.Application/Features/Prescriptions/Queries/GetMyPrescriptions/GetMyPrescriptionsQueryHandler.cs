@@ -35,10 +35,9 @@ public class GetMyPrescriptionsQueryHandler : IRequestHandler<GetMyPrescriptions
         var (items, totalCount) = await _prescriptionRepository.GetPagedAsync(
             request.PageNumber,
             request.PageSize,
-            predicate: p => p.UserId == currentUser.Id, 
-            orderBy: q => q.OrderByDescending(p => p.CreatedAt), 
-            includes: p => p.Replies 
-        );
+            predicate: p => p.UserId == currentUser.Id,
+            orderBy: q => q.OrderByDescending(p => p.CreatedAt)
+            );
 
         var dtos = _mapper.Map<IEnumerable<MyPrescriptionDto>>(items);
 

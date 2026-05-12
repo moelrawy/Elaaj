@@ -4,12 +4,12 @@ using Elaaj.Application.Features.Prescriptions.Commands.CreateReply;
 using Elaaj.Application.Features.Prescriptions.Commands.UpdatePrescriptionStatus;
 using Elaaj.Application.Features.Prescriptions.Queries.GetMyPrescriptions;
 using Elaaj.Application.Features.Prescriptions.Queries.GetNearbyPrescriptions;
+using Elaaj.Domain.Constants;
 using Elaaj.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Restaurants.Domain.Constants;
 using System.Security.Claims;
 
 namespace Elaaj.API.Controllers

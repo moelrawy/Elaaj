@@ -1,9 +1,10 @@
-﻿using Elaaj.Domain.Entities;
+﻿using Elaaj.Domain.Constants;
+using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data;
 using Elaaj.infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Restaurants.Domain.Constants;
+
 
 namespace Elaaj.Infrastructure.Seeders;
 

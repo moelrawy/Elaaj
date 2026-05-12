@@ -1,4 +1,4 @@
-﻿namespace Restaurants.Domain.Constants;
+﻿namespace Elaaj.Domain.Constants;
 
 public static class UserRoles
 {
@@ -6,5 +6,4 @@ public static class UserRoles
     public const string Owner = "Owner";
     public const string PharmacyAdmin = "PharmacyAdmin";
     public const string PharmacyOwner = "PharmacyOwner";
-
 }
