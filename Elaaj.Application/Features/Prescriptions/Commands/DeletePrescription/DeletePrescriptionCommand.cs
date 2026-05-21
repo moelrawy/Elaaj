@@ -10,5 +10,4 @@ namespace Elaaj.Application.Features.Prescriptions.Commands.DeletePrescription;
 public class DeletePrescriptionCommand : IRequest<bool>
 {
     public Guid Id { get; set; }
-    //public string UserId { get; set; } = string.Empty; 
 }

@@ -10,5 +10,5 @@ namespace Elaaj.Application.Interfaces;
 public interface IAuthService
 {
     Task<AuthResult?> RegisterAsync(string fullName, string email, string password);
-    Task<string?> LoginAsync(string email, string password);
+    Task<AuthResult?> LoginAsync(string email, string password);
 }
