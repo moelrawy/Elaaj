@@ -26,7 +26,7 @@ public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, int>
 
     public async Task<int> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
-        var currentUser = _userContext.GetCurrentUser();
+        Users.CurrentUser? currentUser = _userContext.GetCurrentUser();
         if (currentUser == null)
             throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
 
