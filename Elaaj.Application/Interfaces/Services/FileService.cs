@@ -22,7 +22,9 @@ public class FileService : IFileService
         if (file == null || file.Length == 0)
             throw new ArgumentException("لم يتم إرفاق أي ملف.");
 
-        var folderPath = Path.Combine(_env.WebRootPath, "images", folderName);
+        // If WebRootPath is null, fallback to creating a wwwroot folder in the ContentRootPath
+        var webRootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+        var folderPath = Path.Combine(webRootPath, "images", folderName);
 
         if (!Directory.Exists(folderPath))
         {
@@ -47,8 +49,11 @@ public class FileService : IFileService
     {
         if (string.IsNullOrEmpty(fileUrl)) return;
 
+        // Ensure we handle a null WebRootPath here as well
+        var webRootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+        
         // تحويل المسار النسبي لمسار حقيقي على السيرفر لمسحه
-        var fullPath = Path.Combine(_env.WebRootPath, fileUrl.TrimStart('/'));
+        var fullPath = Path.Combine(webRootPath, fileUrl.TrimStart('/'));
         if (File.Exists(fullPath))
         {
             File.Delete(fullPath);

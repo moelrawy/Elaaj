@@ -1,4 +1,5 @@
-﻿using Elaaj.Application.Interfaces;
+﻿using Elaaj.Application.Features.Users.UserDtos;
+using Elaaj.Application.Interfaces;
 using Elaaj.Application.Models;
 using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
@@ -39,9 +40,9 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<string?> RegisterAsync(string fullName, string email, string password)
+    public async Task<AuthResult?> RegisterAsync(string fullName, string email, string password)
     {
-        var user = new User
+        User user = new User
         {
             UserName = email,
             Email = email,
@@ -50,26 +51,25 @@ public class AuthService : IAuthService
 
         var result = await _userManager.CreateAsync(user, password);
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-<<<<<<< Updated upstream
-            // Generate token with roles
-            return await GenerateJwtToken(user);
-=======
-            // 1. Automatically assign User role to every new user
-            await _userManager.AddToRoleAsync(user, UserRoles.User);
-
-            // 2. Generate token with roles
-            var token = await GenerateJwtToken(user);
             return new AuthResult
             {
-                Success = true,
-                Token = token
+                Success = false,
+                Errors = result.Errors
+                    .Select(e => e.Description)
+                    .ToList()
             };
->>>>>>> Stashed changes
         }
 
-        return null;
+        await _userManager.AddToRoleAsync(user, UserRoles.User);
+        string token = await GenerateJwtToken(user);
+
+        return new AuthResult
+        {
+            Success = true,
+            Token = token
+        };
     }
 
     // Made async to fetch roles from Database

@@ -1,6 +1,8 @@
 ﻿using Elaaj.Application.Features.Prescriptions.Commands.AcceptReply;
 using Elaaj.Application.Features.Prescriptions.Commands.CreatePrescription;
 using Elaaj.Application.Features.Prescriptions.Commands.CreateReply;
+using Elaaj.Application.Features.Prescriptions.Commands.DeletePrescription;
+using Elaaj.Application.Features.Prescriptions.Commands.UpdatePrescription;
 using Elaaj.Application.Features.Prescriptions.Commands.UpdatePrescriptionStatus;
 using Elaaj.Application.Features.Prescriptions.Queries.GetMyPrescriptions;
 using Elaaj.Application.Features.Prescriptions.Queries.GetNearbyPrescriptions;
@@ -157,9 +159,6 @@ namespace Elaaj.API.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
-<<<<<<< Updated upstream
-=======
-
         // Only the prescription owner can update their prescriptions
         [HttpPut("{id}")]
         [Authorize(Roles = $"{UserRoles.User},{UserRoles.Owner}")]
@@ -212,6 +211,5 @@ namespace Elaaj.API.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
->>>>>>> Stashed changes
     }
 }
