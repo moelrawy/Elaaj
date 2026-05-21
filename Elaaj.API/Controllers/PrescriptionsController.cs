@@ -1,6 +1,8 @@
 ﻿using Elaaj.Application.Features.Prescriptions.Commands.AcceptReply;
 using Elaaj.Application.Features.Prescriptions.Commands.CreatePrescription;
 using Elaaj.Application.Features.Prescriptions.Commands.CreateReply;
+using Elaaj.Application.Features.Prescriptions.Commands.DeletePrescription;
+using Elaaj.Application.Features.Prescriptions.Commands.UpdatePrescription;
 using Elaaj.Application.Features.Prescriptions.Commands.UpdatePrescriptionStatus;
 using Elaaj.Application.Features.Prescriptions.Queries.GetMyPrescriptions;
 using Elaaj.Application.Features.Prescriptions.Queries.GetNearbyPrescriptions;
@@ -147,6 +149,31 @@ namespace Elaaj.API.Controllers
             {
                 return BadRequest(new { Message = ex.Message });
             }
+        }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePrescription(Guid id, [FromBody] string notes)
+        {
+            var command = new UpdatePrescriptionCommand
+            {
+                Id = id,
+                Notes = notes
+            };
+
+            await _mediator.Send(command);
+            return Ok(new { Message = "تم تعديل الروشتة بنجاح." });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePrescription(Guid id)
+        {
+            var command = new DeletePrescriptionCommand
+            {
+                Id = id
+            };
+
+            await _mediator.Send(command);
+            return Ok(new { Message = "تم حذف الروشتة بنجاح." });
         }
     }
 }
