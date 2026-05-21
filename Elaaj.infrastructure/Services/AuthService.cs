@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq; // Added for .Select
 using System.Threading.Tasks;
 
 namespace Elaaj.infrastructure.Services;
@@ -26,18 +27,15 @@ public class AuthService : IAuthService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public async Task<AuthResult?> LoginAsync(string email, string password) // ✅ AuthResult?
+    public async Task<AuthResult?> LoginAsync(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-            return null;
+            return new AuthResult { Success = false, Errors = new List<string> { "Invalid credentials" } };
 
+        // Generate token with roles
         var token = await GenerateJwtToken(user);
-        return new AuthResult
-        {
-            Success = true,
-            Token = token
-        };
+        return new AuthResult { Success = true, Token = token };
     }
 
     public async Task<AuthResult?> RegisterAsync(string fullName, string email, string password)
@@ -51,28 +49,24 @@ public class AuthService : IAuthService
 
         var result = await _userManager.CreateAsync(user, password);
 
-        if (!result.Succeeded)
+        if (result.Succeeded)
         {
-            return new AuthResult
-            {
-                Success = false,
-                Errors = result.Errors
-                    .Select(e => e.Description)
-                    .ToList()
-            };
+            // 1. Automatically assign User role to every new user
+            await _userManager.AddToRoleAsync(user, UserRoles.User);
+
+            // 2. Generate token with roles
+            var token = await GenerateJwtToken(user);
+            return new AuthResult { Success = true, Token = token };
         }
 
-        await _userManager.AddToRoleAsync(user, UserRoles.User);
-        string token = await GenerateJwtToken(user);
-
-        return new AuthResult
-        {
-            Success = true,
-            Token = token
+        return new AuthResult 
+        { 
+            Success = false, 
+            Errors = result.Errors.Select(e => e.Description).ToList() 
         };
     }
 
-    // Made async to fetch roles from Database
+    // ✅ Made async to fetch roles from Database
     private async Task<string> GenerateJwtToken(User user)
     {
         var claims = new List<Claim>
@@ -82,7 +76,7 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        // Get user roles from Database and add them to Token
+        // ✅ Get user roles from Database and add them to Token
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {
