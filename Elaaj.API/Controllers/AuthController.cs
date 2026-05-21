@@ -21,12 +21,12 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var token = await _authService.LoginAsync(loginDto.Email, loginDto.Password);
+        var authResult = await _authService.LoginAsync(loginDto.Email, loginDto.Password);
 
-        if (token == null)
+        if (authResult == null || !authResult.Success)
             return Unauthorized(new { Message = "بيانات الدخول غير صحيحة" });
 
-        return Ok(new { Token = token });
+        return Ok(new { Token = authResult.Token });
     }
 
     [HttpPost("register")]

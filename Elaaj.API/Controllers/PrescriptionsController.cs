@@ -8,15 +8,13 @@ using Elaaj.Domain.Constants;
 using Elaaj.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Elaaj.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] 
+    [Authorize] // Must be logged in for all endpoints
     public class PrescriptionsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -26,11 +24,12 @@ namespace Elaaj.API.Controllers
             _mediator = mediator;
         }
 
+        // Only regular users and platform owner can create prescriptions
         [HttpPost]
-        [Authorize(Roles = $"{UserRoles.User}")]
+        [Authorize(Roles = $"{UserRoles.User},{UserRoles.Owner}")]
         public async Task<IActionResult> Create([FromForm] CreatePrescriptionCommand command)
         {
-
+            // Handler gets UserId from Token
             var prescriptionId = await _mediator.Send(command);
 
             return Ok(new
@@ -39,12 +38,14 @@ namespace Elaaj.API.Controllers
                 Message = "تم إرسال روشتتك للصيدليات القريبة بنجاح، في انتظار الردود."
             });
         }
-        //this endpoint is for pharmacy staff to get nearby prescriptions to their pharmacy, they can specify a radius in km, default is 5km
+
+        // Only pharmacy staff can get nearby prescriptions
+        // Users cannot see all prescriptions, only pharmacies in their area see them
         [HttpGet("nearby/{pharmacyId}")]
+        [Authorize(Roles = $"{UserRoles.PharmacyOwner},{UserRoles.PharmacyAdmin},{UserRoles.Owner}")]
         public async Task<IActionResult> GetNearbyPrescriptions(Guid pharmacyId, [FromQuery] double radius = 5)
         {
-            
-
+            // Handler gets UserId from Token
             var query = new GetNearbyPrescriptionsQuery
             {
                 PharmacyId = pharmacyId,
@@ -66,9 +67,9 @@ namespace Elaaj.API.Controllers
             }
         }
 
-
+        // Only pharmacy staff can reply to prescriptions
         [HttpPost("{id}/replies")]
-        [Authorize(Roles = $"{UserRoles.PharmacyOwner},{UserRoles.PharmacyAdmin}")]
+        [Authorize(Roles = $"{UserRoles.PharmacyOwner},{UserRoles.PharmacyAdmin},{UserRoles.Owner}")]
         public async Task<IActionResult> AddReply(Guid id, [FromBody] CreatePrescriptionReplyCommand command)
         {
             command.PrescriptionId = id;
@@ -87,11 +88,12 @@ namespace Elaaj.API.Controllers
             }
         }
 
-
+        // Only the prescription owner (User or Owner) can accept replies
         [HttpPut("{prescriptionId}/replies/{replyId}/accept")]
+        [Authorize(Roles = $"{UserRoles.User},{UserRoles.Owner}")]
         public async Task<IActionResult> AcceptReply(Guid prescriptionId, Guid replyId)
         {
-
+            // Handler gets UserId from Token
             var command = new AcceptPrescriptionReplyCommand
             {
                 PrescriptionId = prescriptionId,
@@ -113,11 +115,12 @@ namespace Elaaj.API.Controllers
             }
         }
 
+        // Only the prescription owner can see their own prescriptions
         [HttpGet("my-prescriptions")]
-        [Authorize(Roles = $"{UserRoles.User}")]
+        [Authorize(Roles = $"{UserRoles.User},{UserRoles.Owner}")]
         public async Task<IActionResult> GetMyPrescriptions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-
+            // Handler gets UserId from Token
             var query = new GetMyPrescriptionsQuery
             {
                 PageNumber = pageNumber,
@@ -128,10 +131,12 @@ namespace Elaaj.API.Controllers
             return Ok(result);
         }
 
-        [HttpPatch("{id}/status")] 
+        // Only pharmacy staff or owner can update status
+        [HttpPatch("{id}/status")]
+        [Authorize(Roles = $"{UserRoles.PharmacyOwner},{UserRoles.PharmacyAdmin},{UserRoles.Owner}")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] PrescriptionStatus newStatus)
         {
-
+            // Handler gets UserId from Token and verifies they are pharmacy admin for the reply
             var command = new UpdatePrescriptionStatusCommand
             {
                 PrescriptionId = id,
@@ -143,10 +148,70 @@ namespace Elaaj.API.Controllers
                 await _mediator.Send(command);
                 return Ok(new { Message = "تم تحديث حالة الطلب بنجاح." });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { Message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return BadRequest(new { Message = ex.Message });
             }
         }
+<<<<<<< Updated upstream
+=======
+
+        // Only the prescription owner can update their prescriptions
+        [HttpPut("{id}")]
+        [Authorize(Roles = $"{UserRoles.User},{UserRoles.Owner}")]
+        public async Task<IActionResult> UpdatePrescription(Guid id, [FromBody] string notes)
+        {
+            // Handler gets UserId from Token and verifies ownership
+            var command = new UpdatePrescriptionCommand
+            {
+                Id = id,
+                Notes = notes
+            };
+
+            try
+            {
+                await _mediator.Send(command);
+                return Ok(new { Message = "تم تعديل الروشتة بنجاح." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // Only the prescription owner can delete their prescriptions
+        [HttpDelete("{id}")]
+        [Authorize(Roles = $"{UserRoles.User},{UserRoles.Owner}")]
+        public async Task<IActionResult> DeletePrescription(Guid id)
+        {
+            // Handler gets UserId from Token and verifies ownership
+            var command = new DeletePrescriptionCommand
+            {
+                Id = id
+            };
+
+            try
+            {
+                await _mediator.Send(command);
+                return Ok(new { Message = "تم حذف الروشتة بنجاح." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+>>>>>>> Stashed changes
     }
 }

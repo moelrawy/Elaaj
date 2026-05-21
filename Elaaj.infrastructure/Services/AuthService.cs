@@ -1,5 +1,6 @@
 ﻿using Elaaj.Application.Interfaces;
 using Elaaj.Application.Models;
+using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -24,14 +25,18 @@ public class AuthService : IAuthService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public async Task<string?> LoginAsync(string email, string password)
+    public async Task<AuthResult?> LoginAsync(string email, string password) // ✅ AuthResult?
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             return null;
 
-        // Generate token with roles
-        return await GenerateJwtToken(user);
+        var token = await GenerateJwtToken(user);
+        return new AuthResult
+        {
+            Success = true,
+            Token = token
+        };
     }
 
     public async Task<string?> RegisterAsync(string fullName, string email, string password)
@@ -47,14 +52,27 @@ public class AuthService : IAuthService
 
         if (result.Succeeded)
         {
+<<<<<<< Updated upstream
             // Generate token with roles
             return await GenerateJwtToken(user);
+=======
+            // 1. Automatically assign User role to every new user
+            await _userManager.AddToRoleAsync(user, UserRoles.User);
+
+            // 2. Generate token with roles
+            var token = await GenerateJwtToken(user);
+            return new AuthResult
+            {
+                Success = true,
+                Token = token
+            };
+>>>>>>> Stashed changes
         }
 
         return null;
     }
 
-    // ✅ Made async to fetch roles from Database
+    // Made async to fetch roles from Database
     private async Task<string> GenerateJwtToken(User user)
     {
         var claims = new List<Claim>
@@ -64,7 +82,7 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        // ✅ Get user roles from Database and add them to Token
+        // Get user roles from Database and add them to Token
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {

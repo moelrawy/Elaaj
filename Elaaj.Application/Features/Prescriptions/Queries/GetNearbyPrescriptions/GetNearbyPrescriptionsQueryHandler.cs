@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
 using Elaaj.Application.Features.Prescriptions.DTOs;
 using Elaaj.Application.Users;
+using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Enums;
 using Elaaj.Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace Elaaj.Application.Features.Prescriptions.Queries.GetNearbyPrescriptions;
 
@@ -37,24 +34,36 @@ public class GetNearbyPrescriptionsQueryHandler : IRequestHandler<GetNearbyPresc
 
     public async Task<IEnumerable<PrescriptionDto>> Handle(GetNearbyPrescriptionsQuery request, CancellationToken cancellationToken)
     {
+        // 1. Get current user from Token
         var currentUser = _userContext.GetCurrentUser();
         if (currentUser == null)
             throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
 
-        var isAdmin = await _adminRepository.GetFirstOrDefaultAsync(a =>
-            a.UserId == currentUser.Id && a.PharmacyId == request.PharmacyId);
+        // 2. Check if user is Owner or pharmacy admin for this pharmacy
+        bool isOwner = currentUser.IsInRole(UserRoles.Owner);
 
-        if (isAdmin == null)
+        bool isPharmacyAdmin = false;
+        if (!isOwner)
+        {
+            var isAdmin = await _adminRepository.GetFirstOrDefaultAsync(a =>
+                a.UserId == currentUser.Id && a.PharmacyId == request.PharmacyId);
+            isPharmacyAdmin = isAdmin != null;
+        }
+
+        // 3. Only Owner or pharmacy admin can access nearby prescriptions
+        if (!isOwner && !isPharmacyAdmin)
             throw new UnauthorizedAccessException("غير مصرح لك بالاطلاع على روشتات هذه الصيدلية.");
 
+        // 4. Verify pharmacy exists
         var pharmacy = await _pharmacyRepository.GetByIdAsync(request.PharmacyId);
         if (pharmacy == null)
             throw new ArgumentException("الصيدلية غير موجودة.");
 
-
+        // 5. Get all pending prescriptions
         var allPrescriptions = await _prescriptionRepository.GetAllAsync();
         var activePrescriptions = allPrescriptions.Where(p => p.Status == PrescriptionStatus.Pending);
 
+        // 6. Calculate distance and filter by radius
         var nearbyPrescriptions = activePrescriptions
             .Select(p =>
             {
@@ -69,17 +78,17 @@ public class GetNearbyPrescriptionsQueryHandler : IRequestHandler<GetNearbyPresc
         return nearbyPrescriptions;
     }
 
-    // دالة حساب المسافة (Haversine Formula)
+    // Haversine Formula to calculate distance between two coordinates
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
-        var R = 6371; // نصف قطر الأرض بالكيلومتر
+        var R = 6371; // Earth radius in kilometers
         var dLat = ToRadians(lat2 - lat1);
         var dLon = ToRadians(lon2 - lon1);
         var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
                 Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
                 Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
         var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-        return Math.Round(R * c, 2); // تقريب لرقمين عشريين عشان الموبايل أبلكيشن
+        return Math.Round(R * c, 2);
     }
 
     private double ToRadians(double angle) => Math.PI * angle / 180.0;
