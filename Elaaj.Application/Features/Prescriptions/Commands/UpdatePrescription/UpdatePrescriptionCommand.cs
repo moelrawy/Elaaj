@@ -10,6 +10,5 @@ namespace Elaaj.Application.Features.Prescriptions.Commands.UpdatePrescription;
 public class UpdatePrescriptionCommand : IRequest<bool>
 {
     public Guid Id { get; set; }
-    //public string UserId { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
 }
