@@ -12,6 +12,11 @@ public class User : IdentityUser
     public string? Address { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+
+    // Email Confirmation Properties
+    public string? EmailConfirmationCode { get; set; }
+    public DateTime? EmailConfirmationCodeExpires { get; set; }
+
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
     public ICollection<PharmacyAdmin> ManagedPharmacies { get; set; } = new List<PharmacyAdmin>();
     public virtual ICollection<Pharmacy> OwnedPharmacies { get; set; } = new List<Pharmacy>();
