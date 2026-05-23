@@ -1,5 +1,6 @@
 ﻿using Elaaj.Application.Features.Users.UserDtos;
 using Elaaj.Application.Interfaces;
+using Elaaj.Application.Interfaces.Services;
 using Elaaj.Application.Models;
 using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
@@ -11,7 +12,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Linq; // Added for .Select
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Elaaj.infrastructure.Services;
@@ -20,18 +21,24 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<User> _userManager;
     private readonly JwtSettings _jwtSettings;
+    private readonly IEmailService _emailService; // Added Email Service
 
-    public AuthService(UserManager<User> userManager, IOptions<JwtSettings> jwtSettings)
+    public AuthService(UserManager<User> userManager, IOptions<JwtSettings> jwtSettings, IEmailService emailService)
     {
         _userManager = userManager;
         _jwtSettings = jwtSettings.Value;
+        _emailService = emailService;
     }
 
     public async Task<AuthResult?> LoginAsync(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-            return new AuthResult { Success = false, Errors = new List<string> { "Invalid credentials" } };
+            return new AuthResult { Success = false, Errors = new List<string> { "بيانات الدخول غير صحيحة" } };
+            
+        // Prevent login if email is not confirmed
+        if (!user.EmailConfirmed)
+            return new AuthResult { Success = false, Errors = new List<string> { "يرجى تأكيد بريدك الإلكتروني أولاً" } };
 
         // Generate token with roles
         var token = await GenerateJwtToken(user);
@@ -40,23 +47,29 @@ public class AuthService : IAuthService
 
     public async Task<AuthResult?> RegisterAsync(string fullName, string email, string password)
     {
+        var otpCode = new Random().Next(100000, 999999).ToString();
+        
         User user = new User
         {
             UserName = email,
             Email = email,
-            FullName = fullName
+            FullName = fullName,
+            EmailConfirmed = false,
+            EmailConfirmationCode = otpCode,
+            EmailConfirmationCodeExpires = DateTime.UtcNow.AddMinutes(10)
         };
 
         var result = await _userManager.CreateAsync(user, password);
 
         if (result.Succeeded)
         {
-            // 1. Automatically assign User role to every new user
             await _userManager.AddToRoleAsync(user, UserRoles.User);
 
-            // 2. Generate token with roles
-            var token = await GenerateJwtToken(user);
-            return new AuthResult { Success = true, Token = token };
+            // Send confirmation email
+            var emailBody = $"<p>مرحباً {fullName},</p><p>رمز التأكيد الخاص بك هو: <strong>{otpCode}</strong></p><p>هذا الرمز صالح لمدة 10 دقائق.</p>";
+            await _emailService.SendEmailAsync(user.Email, "تأكيد حسابك", emailBody);
+
+            return new AuthResult { Success = true };
         }
 
         return new AuthResult 
@@ -65,8 +78,30 @@ public class AuthService : IAuthService
             Errors = result.Errors.Select(e => e.Description).ToList() 
         };
     }
+    
+    // Ensure this method is implemented
+    public async Task<AuthResult> VerifyEmailAsync(string email, string code)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return new AuthResult { Success = false, Errors = new List<string> { "المستخدم غير موجود" } };
 
-    // ✅ Made async to fetch roles from Database
+        if (user.EmailConfirmed)
+            return new AuthResult { Success = false, Errors = new List<string> { "الحساب مفعل بالفعل" } };
+
+        if (user.EmailConfirmationCode != code || user.EmailConfirmationCodeExpires < DateTime.UtcNow)
+            return new AuthResult { Success = false, Errors = new List<string> { "رمز التأكيد غير صحيح أو منتهي الصلاحية" } };
+
+        // Mark as confirmed and clean up the code
+        user.EmailConfirmed = true;
+        user.EmailConfirmationCode = null;
+        user.EmailConfirmationCodeExpires = null;
+
+        await _userManager.UpdateAsync(user);
+
+        return new AuthResult { Success = true };
+    }
+
     private async Task<string> GenerateJwtToken(User user)
     {
         var claims = new List<Claim>
@@ -76,7 +111,6 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        // ✅ Get user roles from Database and add them to Token
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {

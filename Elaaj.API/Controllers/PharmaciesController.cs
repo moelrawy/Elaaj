@@ -28,7 +28,7 @@ namespace Elaaj.API.Controllers
             _userContext = userContext;
         }
         [HttpGet]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllPharmaciesQuery());

@@ -5,11 +5,13 @@ using Elaaj.infrastructure.Data;
 using Elaaj.infrastructure.Repositories;
 using Elaaj.infrastructure.Seeders;
 using Elaaj.Infrastructure.Seeders;
+using Elaaj.Application.Interfaces.Services; // Add this
+using Elaaj.infrastructure.Services;         // Add this
+using Elaaj.Application.Models;              // Add this
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
 
 namespace Elaaj.Infrastructure.Extensions
 {
@@ -22,7 +24,6 @@ namespace Elaaj.Infrastructure.Extensions
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             services.AddIdentityApiEndpoints<User>()  
@@ -30,11 +31,14 @@ namespace Elaaj.Infrastructure.Extensions
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddScoped<ISeeder, Seeder>();
-           
+            
+            // Register Email Settings from appsettings.json
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+
+            // Register IEmailService
+            services.AddTransient<IEmailService, EmailService>();
          
             return services;
-
-            
         }
     }
 }
