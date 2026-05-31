@@ -13,5 +13,6 @@ public enum PrescriptionStatus
     Accepted = 2,       
     Completed = 3,      
     Rejected = 4,      
-    Cancelled = 5      
+    Cancelled = 5,
+    Pending = 6,
 }
