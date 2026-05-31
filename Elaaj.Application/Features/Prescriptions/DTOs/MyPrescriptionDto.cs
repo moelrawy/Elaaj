@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elaaj.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +15,6 @@ public record MyPrescriptionDto
     public string Notes { get; init; } = string.Empty;
     public DateTime CreatedAt { get; init; }
     public bool IsResolved { get; init; }
+    public PrescriptionStatus Status { get; init; }
     public ICollection<PrescriptionReplyDto> Replies { get; set; } = new List<PrescriptionReplyDto>();
 }
