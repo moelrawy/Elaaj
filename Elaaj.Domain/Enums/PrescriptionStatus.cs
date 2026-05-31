@@ -8,10 +8,10 @@ namespace Elaaj.Domain.Enums;
 
 public enum PrescriptionStatus
 {
-    Pending,    
-    Accepted,    
-    Preparing,  
-    OutForDelivery, 
-    Delivered,   
-    Cancelled    
+    Active = 0,        
+    OffersReceived = 1, 
+    Accepted = 2,       
+    Completed = 3,      
+    Rejected = 4,      
+    Cancelled = 5      
 }
