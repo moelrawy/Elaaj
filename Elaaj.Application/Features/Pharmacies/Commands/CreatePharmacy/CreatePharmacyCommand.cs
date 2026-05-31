@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Elaaj.Application.Features.Pharmacies.Commands.CreatePharmacy;
 public class CreatePharmacyCommand : IRequest<Guid>
 {
     public string Name { get; set; } = string.Empty;
-    public string imageUrl { get; set; } = string.Empty;
+    public IFormFile? ImageUrl { get; set; }
     public string Address { get; set; } = string.Empty;
     public string WorkingHours { get; set; } = string.Empty;
     public bool HasDelivery { get; set; }

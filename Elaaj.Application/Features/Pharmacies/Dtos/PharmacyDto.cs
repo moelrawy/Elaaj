@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
 
 namespace Elaaj.Application.Features.Pharmacies.Dtos;
 
@@ -6,7 +7,7 @@ public class PharmacyDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty; 
+    public string ImageUrl { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public double Latitude { get; set; }
     public double Longitude { get; set; }

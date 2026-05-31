@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Elaaj.Application.Interfaces;
+using Elaaj.Application.Interfaces.Services;
 using Elaaj.Application.Users;
 using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
@@ -14,17 +16,20 @@ public class CreatePharmacyCommandHandler : IRequestHandler<CreatePharmacyComman
     private readonly IMapper _mapper;
     private readonly IUserContext _userContext; 
     private readonly UserManager<User> _userManager;
+    private readonly IFileService _fileService;
 
     public CreatePharmacyCommandHandler(
         IGenericRepository<Pharmacy> repository,
         IMapper mapper,
         IUserContext userContext,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IFileService fileService)
     {
         _repository = repository;
         _mapper = mapper;
         _userContext = userContext;
         _userManager = userManager;
+        _fileService = fileService;
     }
 
     public async Task<Guid> Handle(CreatePharmacyCommand request, CancellationToken cancellationToken)
@@ -33,7 +38,16 @@ public class CreatePharmacyCommandHandler : IRequestHandler<CreatePharmacyComman
         if (currentUser == null)
             throw new UnauthorizedAccessException("User is not authenticated.");
 
+        string imageUrl = null;
+
+        if (request.ImageUrl != null) // اتأكد إن الـ Command فيه الحقل ده
+        {
+            imageUrl = await _fileService.UploadFileAsync(request.ImageUrl, "pharmacies");
+        }
+
         var pharmacy = _mapper.Map<Pharmacy>(request);
+
+        pharmacy.ImageUrl = imageUrl;
 
         pharmacy.OwnerId = currentUser.Id;
 
