@@ -1,14 +1,12 @@
-﻿using Elaaj.Application.Features.Users.UserDtos;
-using MediatR;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elaaj.Application.Features.Users.Commands.ResetPassword
+namespace Elaaj.Application.Features.Users.UserDtos
 {
-    public class ResetPasswordCommand : IRequest<AuthResult>
+    public class ResetPasswordDto
     {
         public string Email { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;

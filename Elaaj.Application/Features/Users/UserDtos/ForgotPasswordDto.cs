@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Users.UserDtos
 {
-    internal class ForgotResetPasswordDtos
+    public class ForgotPasswordDto
     {
-
+        public string Email { get; set; } = string.Empty;
     }
 }
