@@ -35,25 +35,13 @@ namespace Elaaj.Application.Features.Users.Commands.ForgotPassword
                 };
             }
 
-            // Check if email is not null
-            if (string.IsNullOrEmpty(user.Email))
-            {
-                return new AuthResult
-                {
-                    Success = false,
-                    Message = "خطأ في بيانات البريد الإلكتروني"
-                };
-            }
+            // Generate OTP (6 digits)
+            var otp = GenerateOtp();
 
-            // Generate password reset token
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // Save OTP to store (expires in 10 minutes)
+            OtpStore.SaveOtp(user.Id, otp, expirationMinutes: 10);
 
-            // Send email with reset link
-            var resetLink = $"https://yourapp.com/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email)}";
-
-            // ✅ أضيف السطر ده للـ testing
-            System.Diagnostics.Debug.WriteLine($"Reset Link: {resetLink}");
-
+            // Send OTP via email
             var subject = "استرجاع كلمة المرور - Elaaj";
             var body = $@"
             <html dir='rtl'>
@@ -62,7 +50,7 @@ namespace Elaaj.Application.Features.Users.Commands.ForgotPassword
                     body {{ font-family: Arial, sans-serif; direction: rtl; }}
                     .container {{ max-width: 500px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; }}
                     .header {{ color: #2c3e50; text-align: center; margin-bottom: 20px; }}
-                    .button {{ background-color: #e74c3c; color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; display: inline-block; margin: 20px 0; text-align: center; }}
+                    .otp-box {{ background-color: #e74c3c; color: white; padding: 15px; border-radius: 5px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 3px; margin: 20px 0; }}
                     .footer {{ text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 20px; }}
                 </style>
             </head>
@@ -70,13 +58,9 @@ namespace Elaaj.Application.Features.Users.Commands.ForgotPassword
                 <div class='container'>
                     <h2 class='header'>استرجاع كلمة المرور</h2>
                     <p>تم طلب استرجاع كلمة المرور لحسابك في Elaaj</p>
-                    <p>اضغط على الزرار أدناه لإعادة تعيين كلمة مرورك:</p>
-                    <div style='text-align: center;'>
-                        <a href='{resetLink}' class='button'>إعادة تعيين كلمة المرور</a>
-                    </div>
-                    <p>أو انسخ الرابط التالي في المتصفح:</p>
-                    <p style='word-break: break-all; color: #3498db;'>{resetLink}</p>
-                    <p>هذا الرابط صالح لمدة 24 ساعة فقط.</p>
+                    <p>استخدم الكود التالي لإعادة تعيين كلمة مرورك:</p>
+                    <div class='otp-box'>{otp}</div>
+                    <p>هذا الكود صالح لمدة 10 دقائق فقط.</p>
                     <p style='color: #e74c3c; font-weight: bold;'>إذا لم تقم بطلب هذا، يرجى تجاهل هذا البريد وتغيير كلمة مرورك فوراً.</p>
                     <div class='footer'>
                         <p>© 2025 Elaaj Pharmacy. جميع الحقوق محفوظة.</p>
@@ -92,6 +76,7 @@ namespace Elaaj.Application.Features.Users.Commands.ForgotPassword
             }
             catch
             {
+                OtpStore.RemoveOtp(user.Id);
                 return new AuthResult
                 {
                     Success = false,
@@ -99,11 +84,22 @@ namespace Elaaj.Application.Features.Users.Commands.ForgotPassword
                 };
             }
 
+            // Log for testing
+            System.Diagnostics.Debug.WriteLine($"Forgot Password OTP for {user.Email}: {otp}");
+
             return new AuthResult
             {
                 Success = true,
-                Message = "تم إرسال رسالة استرجاع كلمة المرور إلى بريدك الإلكتروني",
+                Message = "تم إرسال رمز التحقق إلى بريدك الإلكتروني",
+               // Data = new { userId = user.Id }
             };
+        }
+
+        // Generate random 6-digit OTP
+        private string GenerateOtp()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
         }
     }
 }

@@ -3,6 +3,7 @@ using Elaaj.Application.Features.Users.Commands.ForgotPassword;
 using Elaaj.Application.Features.Users.Commands.RegisterUser;
 using Elaaj.Application.Features.Users.Commands.ResetPassword;
 using Elaaj.Application.Features.Users.Commands.VerifyEmail;
+using Elaaj.Application.Features.Users.UserDtos;
 using Elaaj.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -69,8 +70,9 @@ public class AuthController : ControllerBase
     
 
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
     {
+        var command = new ForgotPasswordCommand { Email = forgotPasswordDto.Email };
         var result = await _mediator.Send(command);
 
         if (!result.Success)
@@ -82,8 +84,15 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
     {
+        var command = new ResetPasswordCommand
+        {
+            Otp = resetPasswordDto.Otp,
+            NewPassword = resetPasswordDto.NewPassword,
+            ConfirmPassword = resetPasswordDto.ConfirmPassword
+        };
+
         var result = await _mediator.Send(command);
 
         if (!result.Success)
@@ -94,5 +103,5 @@ public class AuthController : ControllerBase
         return Ok(new { Message = result.Message });
     }
 
-   
+
 }
