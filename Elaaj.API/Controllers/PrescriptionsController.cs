@@ -211,5 +211,30 @@ namespace Elaaj.API.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+
+        // Only the prescription owner can see their own prescription details
+        [HttpGet("{id}")]
+        [Authorize(Roles = $"{UserRoles.User},{UserRoles.Owner}")]
+        public async Task<IActionResult> GetPrescriptionById(Guid id)
+        {
+            var query = new Elaaj.Application.Features.Prescriptions.Queries.GetPrescriptionById.GetPrescriptionByIdQuery
+            {
+                Id = id
+            };
+
+            try
+            {
+                var result = await _mediator.Send(query);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+        }
     }
 }

@@ -73,9 +73,10 @@ public class UpdatePrescriptionStatusCommandHandler : IRequestHandler<UpdatePres
         // 6. Send notification to patient
         string statusArabic = request.NewStatus switch
         {
-            Domain.Enums.PrescriptionStatus.Preparing => "جاري تجهيز طلبك",
-            Domain.Enums.PrescriptionStatus.OutForDelivery => "طلبك في الطريق إليك",
-            Domain.Enums.PrescriptionStatus.Delivered => "تم تسليم الطلب بنجاح",
+            Domain.Enums.PrescriptionStatus.Accepted => "تم قبول عرض وجاري تجهيز الطلب",
+            Domain.Enums.PrescriptionStatus.Completed => "جاهز للتوصيل أو تم التسليم",
+            Domain.Enums.PrescriptionStatus.Rejected => "تم رفض الطلب من قبل الصيدلية",
+            Domain.Enums.PrescriptionStatus.Cancelled => "تم إلغاء الطلب من قبل المريض",
             _ => "تم تحديث حالة طلبك"
         };
 
