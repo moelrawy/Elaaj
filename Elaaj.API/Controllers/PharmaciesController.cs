@@ -2,10 +2,12 @@
 using Elaaj.Application.Features.Pharmacies.Commands.DeletePharmacy;
 using Elaaj.Application.Features.Pharmacies.Commands.ToggleFavorite;
 using Elaaj.Application.Features.Pharmacies.Commands.UpdatePharmacy;
+using Elaaj.Application.Features.Pharmacies.Dtos;
 using Elaaj.Application.Features.Pharmacies.Queries.GetMyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetNearbyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacy;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacyById;
+using Elaaj.Application.Interfaces;
 using Elaaj.Application.Users;
 using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
@@ -23,11 +25,13 @@ namespace Elaaj.API.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IUserContext _userContext;
+        private readonly IFileService _fileService;
 
-        public PharmaciesController(IMediator mediator,IUserContext userContext)
+        public PharmaciesController(IMediator mediator,IUserContext userContext, IFileService fileService)
         {
             _mediator = mediator;
             _userContext = userContext;
+            _fileService = fileService;
         }
         [HttpGet]
         //[AllowAnonymous]
@@ -76,22 +80,12 @@ namespace Elaaj.API.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Create([FromBody] CreatePharmacyCommand command)
+        public async Task<IActionResult> Create([FromForm] CreatePharmacyCommand command)
         {
             var pharmacyId = await _mediator.Send(command);
-            var pharmacy = await _mediator.Send(new GetPharmacyByIdQuery { Id = pharmacyId });
+            var pharmacyDto = await _mediator.Send(new GetPharmacyByIdQuery { Id = pharmacyId });
 
-            return CreatedAtAction(nameof(GetById), new { id = pharmacyId }, new {
-                id = pharmacy.Id,
-                name = pharmacy.Name,
-                address = pharmacy.Address,
-                workingHours = pharmacy.WorkingHours,
-                hasDelivery = pharmacy.HasDelivery,
-                contactNumber = pharmacy.ContactNumber,
-                latitude = pharmacy.Latitude,
-                longitude = pharmacy.Longitude,
-                createdAt = DateTime.UtcNow
-            });
+            return CreatedAtAction(nameof(GetById), new { id = pharmacyId }, pharmacyDto);
         }
 
         [HttpPut("{id}")]

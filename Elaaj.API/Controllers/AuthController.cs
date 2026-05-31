@@ -51,6 +51,7 @@ public class AuthController : ControllerBase
         return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى مراجعة بريدك الإلكتروني لتفعيل الحساب." });
     }
 
+
     [HttpPost("verify-email")]
     public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailCommand command)
     {

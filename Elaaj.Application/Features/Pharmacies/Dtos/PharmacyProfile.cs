@@ -15,11 +15,13 @@ namespace Elaaj.Application.Features.Pharmacies.Dtos
         public PharmacyProfile()
         {
             CreateMap<Pharmacy, PharmacyDto>()
-            .ForMember(dest => dest.Distance, opt => opt.Ignore()); 
+            .ForMember(dest => dest.Distance, opt => opt.Ignore())
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl));
 
             CreateMap<CreatePharmacyCommand, Pharmacy>()
                 .ForMember(dest => dest.OwnerId, opt => opt.Ignore())
-                .ForMember(dest => dest.Admins, opt => opt.Ignore());
+                .ForMember(dest => dest.Admins, opt => opt.Ignore())
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
 
             CreateMap<UpdatePharmacyCommand, Pharmacy>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
