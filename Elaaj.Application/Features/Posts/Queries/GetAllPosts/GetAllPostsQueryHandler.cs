@@ -31,13 +31,12 @@ public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, PagedRe
         if (currentUser == null)
             throw new UnauthorizedAccessException("يجب تسجيل الدخول أولاً");
 
-
         var (items, totalCount) = await _repository.GetPagedAsync(
             request.PageNumber,
             request.PageSize,
             predicate: null, 
             orderBy: q => q.OrderByDescending(p => p.CreatedAt),
-            includes: p => p.Replies
+            includeString: "Replies,Replies.Pharmacy"
         );
 
         var dtos = _mapper.Map<IEnumerable<PostDto>>(items);

@@ -23,6 +23,7 @@ namespace Elaaj.Domain.Interfaces
             int pageSize,
             Expression<Func<T, bool>>? predicate = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, 
+            string includeString = "",
             params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
         

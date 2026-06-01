@@ -80,12 +80,21 @@ namespace Elaaj.infrastructure.Repositories
             int pageSize,
             Expression<Func<T, bool>>? predicate = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string includeString = "",
             params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
 
             if (predicate != null)
                 query = query.Where(predicate);
+
+            if (!string.IsNullOrWhiteSpace(includeString))
+            {
+                foreach (var includeProperty in includeString.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty.Trim());
+                }
+            }
 
             foreach (var include in includes)
                 query = query.Include(include);
