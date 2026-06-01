@@ -1,6 +1,8 @@
-﻿using Elaaj.Application.Features.Posts.Commands.CreatePost;
+﻿using Azure.Core;
+using Elaaj.Application.Features.Posts.Commands.CreatePost;
 using Elaaj.Application.Features.Posts.Commands.DeletePost;
 using Elaaj.Application.Features.Posts.Commands.UpdatePost;
+using Elaaj.Application.Features.Posts.DTOs;
 using Elaaj.Application.Features.Posts.Queries.GetAllPosts;
 using Elaaj.Application.Features.Posts.Queries.GetMyPosts;
 using MediatR;
@@ -56,10 +58,14 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromForm] UpdatePostCommand command)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdatePostDto dto)
         {
-            if (id != command.Id)
-                return BadRequest(new { Message = "معرف الاستفسار غير متطابق." });
+            var command = new UpdatePostCommand
+            {
+                Id = id,
+                Content = dto.Content,
+                File = dto.File
+            };
 
             await _mediator.Send(command);
             return Ok(new { Message = "تم تعديل استفسارك بنجاح." });
