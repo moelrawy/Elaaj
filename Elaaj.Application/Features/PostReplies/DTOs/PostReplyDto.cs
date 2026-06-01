@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.PostReplies.DTOs;
 
 public record PostReplyDto
 {
-    public Guid Id { get; init; }
+    public int Id { get; init; } // Changed from Guid to int
     public string PharmacyName { get; init; } = string.Empty; 
-    public string Comment { get; init; } = string.Empty;
+    public string Message { get; init; } = string.Empty; // Renamed to Message to match entity
     public DateTime CreatedAt { get; init; }
 }
