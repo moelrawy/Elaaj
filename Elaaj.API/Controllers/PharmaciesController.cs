@@ -63,6 +63,22 @@ namespace Elaaj.API.Controllers
             var result = await _mediator.Send(query);
             return Ok(result);
         }
+
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Search([FromQuery] string? keyword, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var query = new Elaaj.Application.Features.Pharmacies.Queries.SearchPharmacies.SearchPharmaciesQuery
+            {
+                Keyword = keyword,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
         [HttpGet("my-pharmacies")]
         public async Task<IActionResult> GetMyPharmacies()
         {
