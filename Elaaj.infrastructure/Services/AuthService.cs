@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace Elaaj.infrastructure.Services;
 
@@ -40,9 +41,15 @@ public class AuthService : IAuthService
         if (!user.EmailConfirmed)
             return new AuthResult { Success = false, Errors = new List<string> { "يرجى تأكيد بريدك الإلكتروني أولاً" } };
 
-        // Generate token with roles
+        // Generate tokens
         var token = await GenerateJwtToken(user);
-        return new AuthResult { Success = true, Token = token };
+        var refreshToken = GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // الـ Refresh Token يستمر لمدة 7 أيام مثلاً
+        await _userManager.UpdateAsync(user);
+
+        return new AuthResult { Success = true, Token = token, RefreshToken = refreshToken };
     }
 
     public async Task<AuthResult?> RegisterAsync(string fullName, string email, string password)
@@ -102,6 +109,30 @@ public class AuthService : IAuthService
         return new AuthResult { Success = true };
     }
 
+    public async Task<AuthResult?> RefreshTokenAsync(string refreshToken)
+    {
+        var users = _userManager.Users.Where(u => u.RefreshToken == refreshToken).ToList();
+        var user = users.FirstOrDefault();
+
+        if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        {
+            return new AuthResult { Success = false, Message = "الـ Refresh Token غير صالح أو انتهت صلاحيته" };
+        }
+
+        var newAccessToken = await GenerateJwtToken(user);
+        var newRefreshToken = GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        await _userManager.UpdateAsync(user);
+
+        return new AuthResult 
+        { 
+            Success = true, 
+            Token = newAccessToken, 
+            RefreshToken = newRefreshToken 
+        };
+    }
+
     private async Task<string> GenerateJwtToken(User user)
     {
         var claims = new List<Claim>
@@ -129,5 +160,13 @@ public class AuthService : IAuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }

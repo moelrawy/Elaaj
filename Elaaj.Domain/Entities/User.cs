@@ -17,6 +17,10 @@ public class User : IdentityUser
     public string? EmailConfirmationCode { get; set; }
     public DateTime? EmailConfirmationCodeExpires { get; set; }
 
+    // Refresh Token Properties
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
     public ICollection<PharmacyAdmin> ManagedPharmacies { get; set; } = new List<PharmacyAdmin>();
     public virtual ICollection<Pharmacy> OwnedPharmacies { get; set; } = new List<Pharmacy>();
