@@ -64,10 +64,23 @@ public class AuthController : ControllerBase
             });
         }
 
-        return Ok(new { Token = authResult.Token });
+        // إرجاع كلا التوكنين
+        return Ok(new { Token = authResult.Token, RefreshToken = authResult.RefreshToken });
     }
 
-    
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
+    {
+        var authResult = await _authService.RefreshTokenAsync(tokenRequestDto.RefreshToken);
+
+        if (authResult == null || !authResult.Success)
+        {
+            return Unauthorized(new { Message = authResult?.Message ?? "تصريح غير صالح." });
+        }
+
+        // إرجاع كلا التوكنين الجدد
+        return Ok(new { Token = authResult.Token, RefreshToken = authResult.RefreshToken });
+    }
 
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
