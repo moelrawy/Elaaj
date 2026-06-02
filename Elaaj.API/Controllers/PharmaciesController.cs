@@ -122,11 +122,24 @@ namespace Elaaj.API.Controllers
         [Authorize(Roles = $"{UserRoles.Owner},{UserRoles.PharmacyOwner}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var success = await _mediator.Send(new DeletePharmacyCommand { Id = id });
+            try
+            {
+                var success = await _mediator.Send(new DeletePharmacyCommand { Id = id });
 
-            if (!success) return NotFound(new { Message = "الصيدلية غير موجودة" });
+                if (!success) return NotFound(new { Message = "الصيدلية غير موجودة" });
 
-            return Ok(new { Message = "تم حذف الصيدلية بنجاح" });
+                return Ok(new { Message = "تم حذف الصيدلية بنجاح" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Returns 403 Forbidden with the custom Arabic message
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Catch any other potential deletion errors safely (such as Db Update issues)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "حدث خطأ أثناء حذف الصيدلية." });
+            }
         }
 
         [HttpPost("toggle-favorite")]
@@ -135,7 +148,7 @@ namespace Elaaj.API.Controllers
             var currentUser = _userContext.GetCurrentUser();
 
             if (currentUser == null) return Unauthorized();
-            await _mediator.Send(command);
+            await _mediator.Send(command);  
             return Ok(new { Message = "تم تحديث قائمة المفضلات" });
         }
     }
