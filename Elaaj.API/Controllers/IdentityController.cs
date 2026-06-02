@@ -1,4 +1,5 @@
 ﻿using Elaaj.Application.Features.Users.Commands.AssignUserRole;
+using Elaaj.Application.Features.Users.Commands.DeleteUser;
 using Elaaj.Application.Features.Users.Commands.GetUserDetails;
 using Elaaj.Application.Features.Users.Commands.UnAssignUserRole;
 using Elaaj.Application.Features.Users.Commands.UpdateUserDetails;
@@ -27,12 +28,20 @@ namespace Elaaj.API.Controllers
             return Ok(userDetails);
         }
 
-        [HttpPatch("user")]
+        [HttpPut("profile")]
         [Authorize]
-        public async Task<IActionResult> UpdateUserDetails(UpdateUserDetailsCommand command)
+        public async Task<IActionResult> UpdateUserDetails([FromForm] UpdateUserDetailsCommand command)
         {
             await mediator.Send(command);
-            return NoContent();
+            return Ok(new { Message = "تم تحديث البيانات الشخصية بنجاح." });
+        }
+
+        [HttpDelete("profile")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUser()
+        {
+            await mediator.Send(new DeleteUserCommand());
+            return Ok(new { Message = "تم حذف حسابك بنجاح." });
         }
 
         [HttpPost("userRole")]
