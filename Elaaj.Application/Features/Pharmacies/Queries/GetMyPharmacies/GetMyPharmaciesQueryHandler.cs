@@ -4,6 +4,10 @@ using Elaaj.Application.Users;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
 using MediatR;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Elaaj.Application.Features.Pharmacies.Queries.GetMyPharmacies;
 
@@ -25,15 +29,27 @@ public class GetMyPharmaciesQueryHandler : IRequestHandler<GetMyPharmaciesQuery,
         var currentUser = _userContext.GetCurrentUser();
         if (currentUser == null) throw new UnauthorizedAccessException();
 
-        var pharmacies = await _repository.GetAllAsync(p => p.OwnerId == currentUser.Id);
-        
+
+        var pharmacies = await _repository.GetAllAsync(p =>
+            p.OwnerId == currentUser.Id ||
+            p.Admins.Any(a => a.UserId == currentUser.Id));
+
         var dtos = _mapper.Map<IEnumerable<PharmacyDto>>(pharmacies);
-        
+
         foreach (var dto in dtos)
         {
-            dto.Role = "Owner";
+            var pharmacy = pharmacies.First(p => p.Id == dto.Id);
+
+            if (pharmacy.OwnerId == currentUser.Id)
+            {
+                dto.Role = "Owner";
+            }
+            else
+            {
+                dto.Role = "Admin";
+            }
         }
-        
+
         return dtos;
     }
 }
