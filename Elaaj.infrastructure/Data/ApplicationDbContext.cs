@@ -17,7 +17,8 @@ public class ApplicationDbContext : IdentityDbContext<User>
     public DbSet<UserFavorite> UserFavorites { get; set; }
     public DbSet<PharmacyAdmin> PharmacyAdmins { get; set; }
     public DbSet<PrescriptionReply> PrescriptionReplies { get; set; }
-    public DbSet<Prescription> Prescriptions { get; set; } 
+    public DbSet<Prescription> Prescriptions { get; set; }
+    public DbSet<ChatMessage> ChatMessages { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder); // ضروري جداً لجدول المستخدمين
