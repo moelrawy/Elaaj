@@ -3,6 +3,7 @@ using Elaaj.Application.Users;
 using Elaaj.Domain.Constants;
 using Elaaj.Domain.Entities;
 using Elaaj.Domain.Interfaces;
+using Elaaj.Domain.Enums;
 using MediatR;
 
 
@@ -80,8 +81,15 @@ public class UpdatePrescriptionStatusCommandHandler : IRequestHandler<UpdatePres
             _ => "تم تحديث حالة طلبك"
         };
 
-        await _notificationService.SendToUserAsync(prescription.UserId, $"تحديث: {statusArabic}");
-
+        await _notificationService.SendToUserAsync(
+            prescription.UserId,
+            "تحديث حالة الروشتة",
+            $"تحديث: {statusArabic}",
+            NotificationType.NewPrescription,
+            prescription.Id.ToString(),
+            nameof(Prescription),
+            cancellationToken
+        );
         return true;
     }
 }

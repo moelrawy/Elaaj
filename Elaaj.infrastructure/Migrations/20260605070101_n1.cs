@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Elaaj.infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class n1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,6 +37,10 @@ namespace Elaaj.infrastructure.Migrations
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Latitude = table.Column<double>(type: "float", nullable: true),
                     Longitude = table.Column<double>(type: "float", nullable: true),
+                    EmailConfirmationCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmailConfirmationCodeExpires = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -58,6 +62,26 @@ namespace Elaaj.infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReadAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RelatedEntityId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RelatedEntityType = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Prescriptions",
                 columns: table => new
                 {
@@ -68,11 +92,25 @@ namespace Elaaj.infrastructure.Migrations
                     Latitude = table.Column<double>(type: "float", nullable: false),
                     Longitude = table.Column<double>(type: "float", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsResolved = table.Column<bool>(type: "bit", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Prescriptions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserDevices",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DeviceToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserDevices", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -187,7 +225,7 @@ namespace Elaaj.infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    imageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Latitude = table.Column<double>(type: "float", nullable: false),
                     Longitude = table.Column<double>(type: "float", nullable: false),
@@ -413,6 +451,16 @@ namespace Elaaj.infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId_IsRead",
+                table: "Notifications",
+                columns: new[] { "UserId", "IsRead" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Pharmacies_OwnerId",
                 table: "Pharmacies",
                 column: "OwnerId");
@@ -487,6 +535,9 @@ namespace Elaaj.infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
                 name: "PharmacyAdmins");
 
             migrationBuilder.DropTable(
@@ -497,6 +548,9 @@ namespace Elaaj.infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "PrescriptionReplies");
+
+            migrationBuilder.DropTable(
+                name: "UserDevices");
 
             migrationBuilder.DropTable(
                 name: "UserFavorites");

@@ -17,20 +17,16 @@ namespace Elaaj.infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.14")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Elaaj.Domain.Entities.ChatMessage", b =>
+            modelBuilder.Entity("Elaaj.Domain.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -38,22 +34,40 @@ namespace Elaaj.infrastructure.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("PrescriptionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ReceiverId")
+                    b.Property<string>("Message")
                         .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RelatedEntityId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SenderId")
-                        .IsRequired()
+                    b.Property<string>("RelatedEntityType")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PrescriptionId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("ChatMessages");
+                    b.HasIndex("UserId", "IsRead");
+
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Elaaj.Domain.Entities.Pharmacy", b =>
@@ -386,6 +400,28 @@ namespace Elaaj.infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Elaaj.Domain.Entities.UserDevices", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserDevices");
                 });
 
             modelBuilder.Entity("Elaaj.Domain.Entities.UserFavorite", b =>

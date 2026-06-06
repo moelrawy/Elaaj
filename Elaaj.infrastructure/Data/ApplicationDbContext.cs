@@ -1,4 +1,5 @@
 ﻿using Elaaj.Domain.Entities;
+using Elaaj.infrastructure.Data.Configurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
     {
     }
 
+    public DbSet<Notification> Notifications { get; set; }
     public DbSet<Pharmacy> Pharmacies { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<PostReply> PostReplies { get; set; }
@@ -18,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
     public DbSet<PharmacyAdmin> PharmacyAdmins { get; set; }
     public DbSet<PrescriptionReply> PrescriptionReplies { get; set; }
     public DbSet<Prescription> Prescriptions { get; set; }
+    public DbSet<UserDevices> UserDevices { get; set; } 
     public DbSet<ChatMessage> ChatMessages { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -114,5 +117,8 @@ public class ApplicationDbContext : IdentityDbContext<User>
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<UserFavorite>()
             .HasKey(uf => new { uf.UserId, uf.PharmacyId });
+
+        //8. إعدادات Notification
+        modelBuilder.ApplyConfiguration(new NotificationConfiguration());
     }
 }
