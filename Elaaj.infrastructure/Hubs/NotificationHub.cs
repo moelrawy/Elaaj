@@ -1,27 +1,34 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Identity.Client;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace Elaaj.infrastructure.Hubs;
-
-[Authorize]
-public class NotificationHub : Hub
+namespace Elaaj.Infrastructure.Hubs
 {
-    public async Task JoinUserGroup(string Id)
+    [Authorize]
+    public class NotificationHub : Hub
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, Id);
+        public override async Task OnConnectedAsync()
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+
+            }
+            await base.OnConnectedAsync();
+
+        }
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
+            }
+            await base.OnDisconnectedAsync(exception);
+        }
     }
-
-
-    public override async Task OnConnectedAsync()
-    {
-        Console.WriteLine($"User Connected: {Context.UserIdentifier}");
-        await base.OnConnectedAsync();
-    }
-
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        Console.WriteLine($"User Disconnected: {Context.UserIdentifier}");
-        await base.OnDisconnectedAsync(exception);
-    }
-
 }

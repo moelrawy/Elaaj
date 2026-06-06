@@ -66,14 +66,21 @@ public class CreatePrescriptionReplyCommandHandler : IRequestHandler<CreatePresc
         await _replyRepository.SaveChangesAsync();
 
 
-        if (prescription != null)
-        {
+        
             string msg = request.TotalPrice.HasValue
                 ? $"صيدلية جديدة قامت بالرد على روشتتك. السعر الإجمالي: {request.TotalPrice} جنيه."
                 : "صيدلية جديدة قامت بالرد على روشتتك وتؤكد توافر الأدوية.";
 
-            await _notificationService.SendToUserAsync(prescription.UserId, msg);
-        }
+            await _notificationService.SendToUserAsync(
+                 prescription.UserId,
+                  "رد على روشتتك",
+                       msg,
+                  NotificationType.NewPrescription,
+                  reply.Id.ToString(),
+                  nameof(PrescriptionReply),
+                  cancellationToken
+);
+        
 
         return reply.Id;
     }

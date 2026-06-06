@@ -1,6 +1,7 @@
 ﻿using Elaaj.Application.Interfaces;
 using Elaaj.Application.Users;
 using Elaaj.Domain.Entities;
+using Elaaj.Domain.Enums;
 using Elaaj.Domain.Interfaces;
 using MediatR;
 using System;
@@ -56,31 +57,38 @@ public class CreatePrescriptionCommandHandler : IRequestHandler<CreatePrescripti
         await _prescriptionRepository.AddAsync(prescription);
         await _prescriptionRepository.SaveChangesAsync();
 
-        await NotifyNearbyPharmacies(prescription);
+        await NotifyNearbyPharmacies(prescription,cancellationToken);
 
         return prescription.Id;
     }
 
-    private async Task NotifyNearbyPharmacies(Prescription prescription)
+    private async Task NotifyNearbyPharmacies(Prescription prescription, CancellationToken cancellationToken)
     {
         var allPharmacies = await _pharmacyRepository.GetAllAsync();
 
         var nearbyPharmacyIds = allPharmacies
-            .Where(ph => CalculateDistance(prescription.Latitude, prescription.Longitude, ph.Latitude, ph.Longitude) <= 5)
+            .Where(ph => CalculateDistance(
+                prescription.Latitude, prescription.Longitude,
+                ph.Latitude, ph.Longitude) <= 5)
             .Select(ph => ph.Id)
             .ToList();
 
         if (nearbyPharmacyIds.Any())
         {
             var admins = await _adminRepository.GetWhereAsync(a => nearbyPharmacyIds.Contains(a.PharmacyId));
-
             var adminUserIds = admins.Select(a => a.UserId).Distinct();
-
-            string message = "هناك روشتة جديدة مرفوعة بالقرب منك، سارع بتقديم عرضك!";
 
             foreach (var adminId in adminUserIds)
             {
-                await _notificationService.SendToUserAsync(adminId, message);
+                await _notificationService.SendToUserAsync(
+                    adminId,
+                    "روشتة جديدة بالقرب منك",                                          // title ✅
+                    "هناك روشتة جديدة مرفوعة بالقرب منك، سارع بتقديم عرضك!",          // message ✅
+                    NotificationType.NewPrescription,                                    // type ✅
+                    prescription.Id.ToString(),                                          // relatedEntityId ✅
+                    nameof(Prescription),                                                // relatedEntityType ✅
+                    cancellationToken                                                    // cancellationToken ✅
+                );
             }
         }
     }

@@ -1,19 +1,26 @@
 using Elaaj.API.Extensions;
 using Elaaj.API.Extentions;
 using Elaaj.API.Middlewares;
-using Elaaj.API.Services;
+using Elaaj.infrastructure.Services;
 using Elaaj.Application.Extensions;
 using Elaaj.Application.Interfaces;
 using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data;
-using Elaaj.infrastructure.Hubs;
+using Elaaj.Infrastructure.Hubs;
 using Elaaj.infrastructure.Seeders;
 using Elaaj.Infrastructure.Extensions;
+using Elaaj.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.AddPresentation();
+//configurationservices
+builder.Services.AddSignalR(options =>
+{ 
+    options.EnableDetailedErrors = true;
+});
+
 
 // MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -23,8 +30,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
-builder.Services.AddSignalR();
-builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationService,NotificationService>();
 builder.Services.AddSwaggerDocumentation();
 // CORS
 builder.Services.AddCors(options =>
@@ -71,6 +77,6 @@ app.MapControllers();
 
 
 // OR inside your AddApplication() or AddInfrastructure() extension methods
-app.MapHub<NotificationHub>("/notificationsHub");
+app.MapHub<NotificationHub>("/NotificationHub");
 
 app.Run();
