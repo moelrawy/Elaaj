@@ -1,11 +1,12 @@
-﻿using Elaaj.Domain.Entities;
+﻿using Elaaj.Application.Interfaces;
+using Elaaj.Domain.Entities;
 using Elaaj.infrastructure.Data.Configurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Elaaj.infrastructure.Data;
 
-public class ApplicationDbContext : IdentityDbContext<User>
+public class ApplicationDbContext : IdentityDbContext<User>,IApplicationDbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

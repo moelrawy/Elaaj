@@ -21,7 +21,10 @@ builder.Services.AddSignalR(options =>
     options.EnableDetailedErrors = true;
 });
 
-
+/*builder.Services.AddSignalR().AddStackExchangeRedis("your_redis_connection_string", options => {
+    options.Configuration.ChannelPrefix = "Elaaj_Notification_Hub";
+});
+*/
 // MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

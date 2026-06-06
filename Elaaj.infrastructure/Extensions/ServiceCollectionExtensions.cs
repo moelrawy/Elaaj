@@ -34,6 +34,7 @@ namespace Elaaj.Infrastructure.Extensions
                 maxRetryDelay: TimeSpan.FromSeconds(30), // هيستنى ثواني بين كل محاولة
                 errorNumbersToAdd: null);
         }));
+            services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 

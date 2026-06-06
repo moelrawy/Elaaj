@@ -23,4 +23,8 @@
     <ProjectReference Include="..\Elaaj.Application\Elaaj.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
