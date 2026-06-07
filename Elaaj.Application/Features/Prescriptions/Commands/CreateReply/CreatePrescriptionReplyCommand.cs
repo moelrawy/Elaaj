@@ -1,14 +1,13 @@
-﻿using MediatR;
+﻿using Elaaj.Application.Features.Prescriptions.DTOs;
+using MediatR;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Elaaj.Application.Features.Prescriptions.Commands.CreateReply;
 
-public class CreatePrescriptionReplyCommand : IRequest<Guid>
+public class CreatePrescriptionReplyCommand : IRequest<PrescriptionReplyDto> 
 {
-    public Guid PrescriptionId { get; set; } 
-
-    //public string UserId { get; set; } = string.Empty;
+    public Guid PrescriptionId { get; set; }
 
     [Required(ErrorMessage = "يجب تحديد الصيدلية التي ترد باسمها.")]
     public Guid PharmacyId { get; set; }

@@ -38,13 +38,15 @@ public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, int>
         {
             imageUrl = await _fileService.UploadFileAsync(request.File, "generalposts");
         }
+        var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+        var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 
         var Post = new Post
         {
             UserId = currentUser.Id,
             Content = request.Content,
             ImageUrl = imageUrl,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = egyptTime
         };
 
         await _repository.AddAsync(Post);
