@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace Elaaj.API.Controllers
 {
-    //[Authorize]
-    [AllowAnonymous]
+    [Authorize]
     [ApiController]
 
     [Route("api/[controller]")]
@@ -24,10 +23,10 @@ namespace Elaaj.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetNotifications([FromQuery] string userId,[FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] bool? isRead = null)
+        
+        public async Task<IActionResult> GetNotifications([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] bool? isRead = null)
         {
-           // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var query = new GetNotificationsQuery(userId!, pageNumber, pageSize, isRead);
             var result = await _mediator.Send(query);
             return Ok(result);
@@ -51,9 +50,9 @@ namespace Elaaj.API.Controllers
         }
     
     [HttpGet("unread-count")]
-        public async Task<IActionResult> GetUnreadCount([FromQuery] string userId)
+        public async Task<IActionResult> GetUnreadCount()
         {
-            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var count = await _mediator.Send(new GetUnreadNotificationsCountQuery(userId!));
             return Ok(new { unreadCount = count });
         }
