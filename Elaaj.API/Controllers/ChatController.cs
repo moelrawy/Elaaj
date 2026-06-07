@@ -29,36 +29,48 @@ public class ChatController : ControllerBase
     /// </summary>
     [HttpPost("send")]
     public async Task<IActionResult> SendMessage(
-       [FromBody] SendMessageCommand command,
-       [FromServices] IGenericRepository<Pharmacy> pharmacyRepo)
+        [FromBody] SendMessageCommand command,
+        [FromServices] IGenericRepository<Pharmacy> pharmacyRepo)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-        if (User.IsInRole(UserRoles.Owner) || User.IsInRole(UserRoles.PharmacyAdmin) || User.IsInRole(UserRoles.PharmacyOwner))
+        // =================================================================
+        // 🚀 التعديل الجوهري: تحديد "نية" المستخدم بناءً على الـ SenderId
+        // =================================================================
+
+        // هل المستخدم بيحاول يبعت الرسالة بالنيابة عن صيدلية؟
+        bool isActingAsPharmacy = !string.IsNullOrEmpty(command.SenderId) && command.SenderId != currentUserId;
+
+        if (isActingAsPharmacy)
         {
-            if (string.IsNullOrEmpty(command.SenderId))
-                return BadRequest(new { Message = "يجب إرسال معرف الصيدلية (SenderId)." });
+            // 1. نتأكد إن التوكن بتاعه فيه صلاحيات الصيدلة أصلاً
+            if (!User.IsInRole(UserRoles.Owner) && !User.IsInRole(UserRoles.PharmacyAdmin) && !User.IsInRole(UserRoles.PharmacyOwner))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "ليس لديك صلاحية لإرسال رسائل كصيدلية." });
+            }
 
+            // 2. نتأكد من صحة صيغة الـ ID بتاع الصيدلية
             if (!Guid.TryParse(command.SenderId, out Guid pharmacyId))
+            {
                 return BadRequest(new { Message = "صيغة معرف الصيدلية غير صحيحة." });
+            }
 
-            // التأكد إن اليوزر ده له صلاحية على الصيدلية
+            // 3. نتأكد إنه المالك أو الأدمن للصيدلية دي تحديداً
             var authorizedPharmacies = await pharmacyRepo.GetAllAsync(p =>
                 p.Id == pharmacyId &&
                 (p.OwnerId == currentUserId || p.Admins.Any(a => a.UserId == currentUserId))
             );
 
             if (!authorizedPharmacies.Any())
+            {
                 return StatusCode(StatusCodes.Status403Forbidden, new { Message = "غير مصرح لك بإرسال رسائل نيابة عن هذه الصيدلية." });
-        }
-        else if (User.IsInRole(UserRoles.User))
-        {
-            command.SenderId = currentUserId;
+            }
         }
         else
         {
-            return StatusCode(StatusCodes.Status403Forbidden, new { Message = "التوكن الخاص بك لا يحتوي على صلاحيات مقروءة!" });
+            // لو الـ SenderId فاضي، أو بيساوي الـ ID بتاع اليوزر، يبقى هو بيلعب دور "المريض" دلوقتي
+            command.SenderId = currentUserId;
         }
 
         var result = await _mediator.Send(command);
@@ -72,28 +84,34 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> GetChatHistory(
     Guid prescriptionId,
     string otherUserId,
-    [FromQuery] string? pharmacyId, // 👈 ضفنا الباراميتر ده عشان الصيدلية تبعت رقمها
+    [FromQuery] string? pharmacyId,
     [FromServices] IGenericRepository<Pharmacy> pharmacyRepo)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-        string participantId = currentUserId; // الديفولت هو المريض
+        string participantId = currentUserId; // الديفولت: اليوزر بيستعرض الشات كمريض
 
-        // لو اللي بيطلب الهيستوري صيدلية (أدمن أو مالك)
-        if (User.IsInRole(UserRoles.Owner) || User.IsInRole(UserRoles.PharmacyAdmin) || User.IsInRole(UserRoles.PharmacyOwner))
+        // =================================================================
+        // 🚀 التعديل: تحديد "نية" الاستعراض بناءً على إرسال pharmacyId
+        // =================================================================
+        bool isActingAsPharmacy = !string.IsNullOrEmpty(pharmacyId);
+
+        if (isActingAsPharmacy)
         {
-            if (string.IsNullOrEmpty(pharmacyId))
+            // 1. نتأكد إن التوكن فيه صلاحيات الصيدلة
+            if (!User.IsInRole(UserRoles.Owner) && !User.IsInRole(UserRoles.PharmacyAdmin) && !User.IsInRole(UserRoles.PharmacyOwner))
             {
-                return BadRequest(new { Message = "يجب إرسال معرف الصيدلية (pharmacyId) في الـ Query Parameters." });
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = "ليس لديك صلاحية لعرض رسائل الصيدليات." });
             }
 
+            // 2. التأكد من الصيغة
             if (!Guid.TryParse(pharmacyId, out Guid parsedPharmacyId))
             {
                 return BadRequest(new { Message = "صيغة معرف الصيدلية غير صحيحة." });
             }
 
-            // خطوة الأمان: نتأكد إن اليوزر ده فعلاً مدير في الصيدلية دي
+            // 3. نتأكد إنه المالك أو الأدمن للصيدلية دي
             var authorizedPharmacies = await pharmacyRepo.GetAllAsync(p =>
                 p.Id == parsedPharmacyId &&
                 (p.OwnerId == currentUserId || p.Admins.Any(a => a.UserId == currentUserId))
@@ -104,14 +122,14 @@ public class ChatController : ControllerBase
                 return StatusCode(StatusCodes.Status403Forbidden, new { Message = "غير مصرح لك بعرض رسائل هذه الصيدلية." });
             }
 
-            // لو تمام، هنخلي الطرف اللي بيبحث في الداتا بيز هو الصيدلية
+            // لو كل حاجة تمام، نخلي الطرف اللي بيبحث في الداتا بيز هو "الصيدلية"
             participantId = pharmacyId;
         }
 
         var query = new GetChatHistoryQuery
         {
             PrescriptionId = prescriptionId,
-            CurrentUserId = participantId, // 👈 هياخد رقم الصيدلية لو صيدلي، ورقم المريض لو مريض
+            CurrentUserId = participantId, // هياخد رقم المريض أو رقم الصيدلية حسب النية
             OtherUserId = otherUserId
         };
 
