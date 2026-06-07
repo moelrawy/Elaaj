@@ -7,6 +7,7 @@ using Elaaj.Application.Features.Pharmacies.Queries.GetMyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetNearbyPharmacies;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacy;
 using Elaaj.Application.Features.Pharmacies.Queries.GetPharmacyById;
+using Elaaj.Application.Features.Prescriptions.Queries.GetAcceptedPrescriptions;
 using Elaaj.Application.Interfaces;
 using Elaaj.Application.Users;
 using Elaaj.Domain.Constants;
@@ -150,6 +151,14 @@ namespace Elaaj.API.Controllers
             if (currentUser == null) return Unauthorized();
             await _mediator.Send(command);  
             return Ok(new { Message = "تم تحديث قائمة المفضلات" });
+        }
+        [HttpGet("pharmacy/{pharmacyId}/accepted")]
+        [Authorize(Roles = $"{UserRoles.PharmacyOwner},{UserRoles.PharmacyAdmin},{UserRoles.Owner}")]
+        public async Task<IActionResult> GetAcceptedPrescriptionsForPharmacy([FromRoute] Guid pharmacyId)
+        {
+            var query = new GetAcceptedPrescriptionsQuery { PharmacyId = pharmacyId };
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Elaaj.Application.Features.Prescriptions.Queries.GetAcceptedPrescriptions;
 using Elaaj.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -22,5 +23,7 @@ public class PrescriptionProfile : Profile
         // Map PrescriptionReply to PrescriptionReplyDto
         CreateMap<PrescriptionReply, PrescriptionReplyDto>()
             .ForMember(dest => dest.PharmacyName, opt => opt.MapFrom(src => src.Pharmacy.Name));
+
+        CreateMap<Prescription, AcceptedPrescriptionDto>();
     }
 }

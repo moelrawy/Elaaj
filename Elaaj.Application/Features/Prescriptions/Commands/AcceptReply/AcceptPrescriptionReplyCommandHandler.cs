@@ -48,11 +48,10 @@ public class AcceptPrescriptionReplyCommandHandler : IRequestHandler<AcceptPresc
             throw new ArgumentException("هذا العرض غير صحيح أو لا ينتمي لهذه الروشتة.");
 
         prescription.Status = PrescriptionStatus.Accepted;
+        prescription.AcceptedPharmacyId = reply.PharmacyId;
 
         _prescriptionRepository.Update(prescription);
         await _prescriptionRepository.SaveChangesAsync();
-
-        //  مستقبلاً مع SignalR: هنا هنبعت إشعار للصيدلية المحددة عشان يجهزوا الدواء
 
         return true;
     }

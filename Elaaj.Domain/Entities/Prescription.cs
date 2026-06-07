@@ -12,6 +12,7 @@ public class Prescription
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public string UserId { get; set; } = string.Empty;
+    public Guid? AcceptedPharmacyId { get; set; }
 
     public string ImageUrl { get; set; } = string.Empty; 
     public string Notes { get; set; } = string.Empty; 
