@@ -14,4 +14,5 @@ public record ChatMessageDto
     public string ReceiverId { get; init; } = string.Empty;
     public string Content { get; init; } = string.Empty;
     public DateTime CreatedAt { get; init; }
+    public string SenderName { get; set; } = string.Empty;
 }

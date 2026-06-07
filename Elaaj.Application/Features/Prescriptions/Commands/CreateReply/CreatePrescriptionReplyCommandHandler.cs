@@ -54,6 +54,7 @@ public class CreatePrescriptionReplyCommandHandler : IRequestHandler<CreatePresc
 
         var reply = new PrescriptionReply
         {
+            
             PrescriptionId = request.PrescriptionId,
             PharmacyId = request.PharmacyId,
             Message = request.Message,
